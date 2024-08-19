@@ -7,7 +7,7 @@ build/
 !**/src/test/**/target/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+files/
 .DS_Store
 
 # The following files are generated/updated by vaadin-maven-plugin or vaadin-gradle-plugin
