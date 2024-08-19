@@ -13,6 +13,7 @@
         <module>interview-app</module>
         <module>my-tools-vaadin-app</module>
         <module>english-text-stats-app</module>
+        <module>file-storage-app</module>
         <module>common-vaadin</module>
     </modules>
 
