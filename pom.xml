@@ -14,6 +14,7 @@
         <module>my-tools-vaadin-app</module>
         <module>english-text-stats-app</module>
         <module>file-storage-app</module>
+        <module>learning-language-app</module>
         <module>common-vaadin</module>
     </modules>
 
