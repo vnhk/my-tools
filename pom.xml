@@ -16,6 +16,7 @@
         <module>file-storage-app</module>
         <module>learning-language-app</module>
         <module>common-vaadin</module>
+        <module>shopping-stats-server-app</module>
     </modules>
 
 </project>
