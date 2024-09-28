@@ -1,0 +1,17 @@
+services:
+  my-tools-mariadb-dev-local:
+    image: mariadb:latest
+    volumes:
+      - my-tools-db-data-local:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: my_tools_db
+      MYSQL_USER: my_tools_user
+      MYSQL_PASSWORD: my_tools_user
+    ports:
+      - 3700:3306
+    expose:
+      - 3700
+
+volumes:
+  my-tools-db-data-local:
