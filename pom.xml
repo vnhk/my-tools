@@ -11,6 +11,7 @@
 
     <modules>
         <module>pocket-app</module>
+        <module>spreadsheet-app</module>
         <module>interview-app</module>
         <module>my-tools-vaadin-app</module>
         <module>english-text-stats-app</module>
