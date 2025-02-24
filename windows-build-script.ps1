@@ -52,9 +52,9 @@ $bervanUtilsUpdated = Update-Folder -folderPath "bervan-utils" -folderName "berv
 
 if ($bervanUtilsUpdated) {
     Write-Host "bervan-utils has been updated, building common-vaadin..."
-    $commonVaadinUpdated = Update-Folder -folderPath "common-vaadin" -folderName "common-vaadin" -forceRebuilt true
+    $commonVaadinUpdated = Update-Folder -folderPath "common-vaadin" -folderName "common-vaadin" -forceRebuilt $true
 } else {
-    $commonVaadinUpdated = Update-Folder -folderPath "common-vaadin" -folderName "common-vaadin" -forceRebuilt false
+    $commonVaadinUpdated = Update-Folder -folderPath "common-vaadin" -folderName "common-vaadin" -forceRebuilt $false
 }
 
 if ($commonVaadinUpdated) {
