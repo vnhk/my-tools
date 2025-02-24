@@ -1,6 +1,7 @@
 $folders = @(
         'bervan-utils'
         'common-vaadin'
+        'file-storage-app'
         'pocket-app'
         'spreadsheet-app'
         'project-mgmt-app'
@@ -8,7 +9,6 @@ $folders = @(
         'streaming-platform-app'
         'interview-app'
         'english-text-stats-app'
-        'file-storage-app'
         'learning-language-app'
         'shopping-stats-server-app'
 )
