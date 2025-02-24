@@ -1,16 +1,16 @@
 $folders = @(
-        bervan-utils
-        common-vaadin
-        pocket-app
-        spreadsheet-app
-        project-mgmt-app
-        canvas-app
-        streaming-platform-app
-        interview-app
-        english-text-stats-app
-        file-storage-app
-        learning-language-app
-        shopping-stats-server-app
+        'bervan-utils'
+        'common-vaadin'
+        'pocket-app'
+        'spreadsheet-app'
+        'project-mgmt-app'
+        'canvas-app'
+        'streaming-platform-app'
+        'interview-app'
+        'english-text-stats-app'
+        'file-storage-app'
+        'learning-language-app'
+        'shopping-stats-server-app'
 )
 
 
