@@ -23,8 +23,9 @@ function Update-Folder {
 
     Write-Host "Processing module: $folderName"
 
-    Set-Location -Path $folderPath
+    Push-Location -Path $folderPath
 
+    Write-Host "Pulling latest changes from Git in: $folderName"
     $gitOutput = git pull 2>&1
 
     if ($gitOutput -notmatch "Already up to date.") {
@@ -34,6 +35,7 @@ function Update-Folder {
         Write-Host "Building Docker for: $folderName"
         docker build --no-cache -t $folderName .
 
+        Pop-Location
         return $true
     } else {
         Write-Host "No changes in module: $folderName"
@@ -42,11 +44,16 @@ function Update-Folder {
             $script:anyFolderUpdated = $true
             Write-Host "Building Docker for: $folderName"
             docker build --no-cache -t $folderName .
+
+            Pop-Location
             return $true
         }
+
+        Pop-Location
         return $false
     }
 }
+
 
 $bervanUtilsUpdated = Update-Folder -folderPath "bervan-utils" -folderName "bervan-utils"
 
