@@ -1,0 +1,63 @@
+services:
+  my-tools-mariadb:
+    image: mariadb:latest
+    container_name: my-tools-mariadb
+    volumes:
+      - my-tools-db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MARIA_DB_ROOT_PWD}
+      MYSQL_DATABASE: ${MARIA_DB_NAME}
+      MYSQL_USER: ${MARIA_DB_USER_NAME}
+      MYSQL_PASSWORD: ${MARIA_DB_USER_PWD}
+    ports:
+      - 3500:3500
+
+  my-tools-app:
+    build: ./my-tools-vaadin-app
+    container_name: my-tools-app
+    volumes:
+      - ${FILE_SERVICE_STORAGE_FOLDER_HOST}:/app/file-service/storage
+      - ${KEYSTORE_PATH_HOST}:/keystore/keystore.p12
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://my-tools-mariadb/${MARIA_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${MARIA_DB_USER_NAME}
+      - SPRING_DATASOURCE_PASSWORD=${MARIA_DB_USER_PWD}
+      - SPRING_DATASOURCE_DATABASE_NAME=${MARIA_DB_NAME}
+      - FILE_SERVICE_STORAGE_FOLDER=/app/file-service/storage
+      - TRANSLATION_GOOGLE_API_KEY=${TRANSLATION_GOOGLE_API_KEY}
+      - EPUB_APP_FILES_RELATIVE_PATH=${EPUB_APP_FILES_RELATIVE_PATH}
+      - GLOBAL_TMP_FILES_RELATIVE_PATH=${GLOBAL_TMP_FILES_RELATIVE_PATH}
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - APP_ACCESS_API_KEYS=${APP_ACCESS_API_KEYS}
+      - APP_ACCESS_API_KEYS_USERNAMES=${APP_ACCESS_API_KEYS_USERNAMES}
+      - KEYSTORE_PATH=/keystore/keystore.p12
+      - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
+      - STREAMING_PLATFORM_FILES_RELATIVE_PATH=${STREAMING_PLATFORM_FILES_RELATIVE_PATH}
+    ports:
+      - 8091:8081
+    depends_on:
+      - my-tools-mariadb
+
+  mysql-cron-backup:
+    image: fradelg/mysql-cron-backup
+    depends_on:
+      - my-tools-mariadb
+    volumes:
+      - ${VOLUME_BACKUP_FOLDER_PATH}:/backup
+    environment:
+      - MYSQL_HOST=my-tools-mariadb
+      - MYSQL_USER=root
+      - MYSQL_PASS=${MARIA_DB_ROOT_PWD}
+      - MAX_BACKUPS=30
+      - INIT_BACKUP=0
+      # Every day at 03:00
+      - CRON_TIME=0 3 * * *
+      # Make it small
+      - GZIP_LEVEL=9
+      # As of MySQL 8.0.21 this is needed
+      - MYSQLDUMP_OPTS=--no-tablespaces --complete-insert --no-create-info --skip-add-drop-table --skip-triggers
+    restart: unless-stopped
+
+volumes:
+  my-tools-db-data:
+  my-tools-storage-data:
