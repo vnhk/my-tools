@@ -1,10 +1,8 @@
 $folders = @(
-        'file-storage-app'
         'pocket-app'
         'spreadsheet-app'
         'project-mgmt-app'
         'canvas-app'
-        'streaming-platform-app'
         'interview-app'
         'english-text-stats-app'
         'learning-language-app'
@@ -66,6 +64,18 @@ if ($bervanUtilsUpdated) {
 
 if ($commonVaadinUpdated) {
     Write-Host "common-vaadin has been rebuilt, building other modules..."
+}
+
+$fileStorageUpdated = Update-Folder -folderPath "file-storage-app" -folderName "file-storage-app" -forceRebuilt $commonVaadinUpdated
+
+if ($fileStorageUpdated) {
+    Write-Host "file-storage-app has been rebuilt, building streaming"
+}
+
+if($fileStorageUpdated -Or $commonVaadinUpdated) {
+    Update-Folder -folderPath "streaming-platform-app" -folderName "streaming-platform-app" -forceRebuilt $true
+} else {
+    Update-Folder -folderPath "streaming-platform-app" -folderName "streaming-platform-app" -forceRebuilt $false
 }
 
 for ($i = 0; $i -lt $folders.Length; $i++) {
