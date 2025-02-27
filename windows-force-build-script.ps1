@@ -57,8 +57,6 @@ for ($i = 0; $i -lt $folders.Length; $i++) {
    Update-Folder -folderPath $folders[$i] -folderName $folders[$i] -forceRebuilt $true
 }
 
-Update-Folder -folderPath "my-tools-vaadin-app" -folderName "my-tools-vaadin-app" -forceRebuilt $true
-
 docker-compose --env-file .env_my_tools up --build -d
 
 Write-Host "END"
