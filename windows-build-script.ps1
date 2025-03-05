@@ -31,7 +31,7 @@ function Update-Folder {
         $script:anyFolderUpdated = $true
 
         Write-Host "Building Docker for: $folderName"
-        docker build --no-cache -t $folderName .
+        docker build -t $folderName .
 
         Pop-Location
         return $true
