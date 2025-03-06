@@ -13,7 +13,7 @@ services:
       - 3500:3500
 
   my-tools-app:
-    build: ./my-tools-vaadin-app
+    build: .
     container_name: my-tools-app
     volumes:
       - ${FILE_SERVICE_STORAGE_FOLDER_HOST}:/app/file-service/storage
