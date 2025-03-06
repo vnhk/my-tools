@@ -26,3 +26,4 @@ cd "%initial_dir%"
 docker-compose --env-file .env_my_tools up --build -d
 
 endlocal
+pause
