@@ -12,7 +12,7 @@ for %%f in (%folders%) do (
     git stash
     git pull
     if "%%f"=="bervan-utils" (
-      docker build -t bervan-utils
+      docker build -t bervan-utils .
     )
     cd ..
   ) else (
