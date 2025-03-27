@@ -11,16 +11,37 @@ RUN mvn install:install-file -Dfile=./history-tables-core.jar -DgroupId=com.berv
 RUN mvn install:install-file -Dfile=./ie-entities.jar -DgroupId=com.bervan -DartifactId=ie-entities -Dversion=latest -Dpackaging=jar -DgeneratePom=true
 
 COPY ./common-vaadin ./common-vaadin
+RUN mvn -f='./common-vaadin' install -DskipTests -U
+
 COPY ./shopping-stats-server-app ./shopping-stats-server-app
+RUN mvn -f='./shopping-stats-server-app' install -DskipTests -U
+
 COPY ./file-storage-app ./file-storage-app
+RUN mvn -f='./file-storage-app' install -DskipTests -U
+
 COPY ./canvas-app ./canvas-app
+RUN mvn -f='./canvas-app' install -DskipTests -U
+
 COPY ./spreadsheet-app ./spreadsheet-app
+RUN mvn -f='./spreadsheet-app' install -DskipTests -U
+
 COPY ./interview-app ./interview-app
+RUN mvn -f='./interview-app' install -DskipTests -U
+
 COPY ./english-text-stats-app ./english-text-stats-app
-COPY ./learning-language-app ./learning-language-app
+RUN mvn -f='./english-text-stats-app' install -DskipTests -U
+
 COPY ./pocket-app ./pocket-app
+RUN mvn -f='./pocket-app' install -DskipTests -U
+
 COPY ./project-mgmt-app ./project-mgmt-app
+RUN mvn -f='./project-mgmt-app' install -DskipTests -U
+
 COPY ./streaming-platform-app ./streaming-platform-app
+RUN mvn -f='./streaming-platform-app' install -DskipTests -U
+
+COPY ./learning-language-app ./learning-language-app
+RUN mvn -f='./learning-language-app' install -DskipTests -U
 
 COPY ./my-tools-vaadin-app/pom.xml ./my-tools-vaadin-app/pom.xml
 COPY ./my-tools-vaadin-app/tsconfig.json ./my-tools-vaadin-app/tsconfig.json
@@ -32,28 +53,6 @@ COPY ./my-tools-vaadin-app/src/main/frontend/themes ./my-tools-vaadin-app/src/ma
 COPY ./my-tools-vaadin-app/src/main/frontend/index.html ./my-tools-vaadin-app/src/main/frontend/index.html
 COPY ./my-tools-vaadin-app/src/main/frontend/theme-changer.js ./my-tools-vaadin-app/src/main/frontend/theme-changer.js
 COPY ./my-tools-vaadin-app/configuration ./my-tools-vaadin-app/configuration
-
-RUN mvn -f='./common-vaadin' install -DskipTests -U
-
-RUN mvn -f='./shopping-stats-server-app' install -DskipTests -U
-
-RUN mvn -f='./file-storage-app' install -DskipTests -U
-
-RUN mvn -f='./canvas-app' install -DskipTests -U
-
-RUN mvn -f='./spreadsheet-app' install -DskipTests -U
-
-RUN mvn -f='./interview-app' install -DskipTests -U
-
-RUN mvn -f='./english-text-stats-app' install -DskipTests -U
-
-RUN mvn -f='./learning-language-app' install -DskipTests -U
-
-RUN mvn -f='./pocket-app' install -DskipTests -U
-
-RUN mvn -f='./project-mgmt-app' install -DskipTests -U
-
-RUN mvn -f='./streaming-platform-app' install -DskipTests -U
 
 RUN mvn -f='./my-tools-vaadin-app' -Pproduction install -DskipTests -U
 
