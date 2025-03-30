@@ -1,0 +1,30 @@
+.git
+.gitignore
+.idea/
+.vscode/
+*.iml
+
+target/
+dist/
+build/
+node_modules/
+out/
+coverage/
+.DS_Store  # macOS cache
+
+*.log
+*.swp
+*.swo
+*.swn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.env
+.env_*
+*.bak
+*.tmp
+
+Thumbs.db  # Windows cache
+ehthumbs.db
+Desktop.ini
