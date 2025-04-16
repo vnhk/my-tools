@@ -61,3 +61,5 @@ mvnw
 tsconfig.json
 types.d.ts
 index.html
+
+env_my_tools
