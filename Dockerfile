@@ -39,6 +39,16 @@ COPY ./streaming-platform-app ./streaming-platform-app
 COPY ./learning-language-app ./learning-language-app
 COPY ./my-tools-vaadin-app ./my-tools-vaadin-app
 
+#themes manual copy to all required directions
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+
+
 RUN mvn install -Pproduction -DskipTests
 
 FROM openjdk:17 AS runtime
