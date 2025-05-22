@@ -20,7 +20,7 @@ services:
       MYSQL_USER: ${MARIA_DB_USER_NAME}
       MYSQL_PASSWORD: ${MARIA_DB_USER_PWD}
     ports:
-      - "3500:3500"
+      - "3500:3306"
 
   my-tools-app:
     build: .
