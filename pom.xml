@@ -12,6 +12,7 @@
     <modules>
         <module>common-vaadin</module>
         <module>pocket-app</module>
+        <module>invest-track-app</module>
         <module>spreadsheet-app</module>
         <module>project-mgmt-app</module>
         <module>canvas-app</module>
