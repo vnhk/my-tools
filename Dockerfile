@@ -16,6 +16,7 @@ COPY shopping-stats-server-app/pom.xml shopping-stats-server-app/
 COPY file-storage-app/pom.xml file-storage-app/
 COPY canvas-app/pom.xml canvas-app/
 COPY spreadsheet-app/pom.xml spreadsheet-app/
+COPY invest-track-app/pom.xml invest-track-app/
 COPY interview-app/pom.xml interview-app/
 COPY english-text-stats-app/pom.xml english-text-stats-app/
 COPY pocket-app/pom.xml pocket-app/
@@ -31,6 +32,7 @@ COPY ./shopping-stats-server-app ./shopping-stats-server-app
 COPY ./file-storage-app ./file-storage-app
 COPY ./canvas-app ./canvas-app
 COPY ./spreadsheet-app ./spreadsheet-app
+COPY ./invest-track-app ./invest-track-app
 COPY ./interview-app ./interview-app
 COPY ./english-text-stats-app ./english-text-stats-app
 COPY ./pocket-app ./pocket-app
