@@ -60,4 +60,4 @@ WORKDIR /app
 COPY --from=builder /app/my-tools-vaadin-app/target/my-tools-vaadin-app.jar ./my-tools-vaadin-app.jar
 COPY --from=builder /app/my-tools-vaadin-app/configuration ./configuration
 
-CMD ["java", "-jar", "-Dspring.profiles.active=production", "my-tools-vaadin-app.jar"]
+CMD ["java", "-Xms2g", "-Xmx9g", "-Dspring.profiles.active=production", "-jar", "my-tools-vaadin-app.jar"]
