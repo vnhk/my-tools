@@ -64,8 +64,8 @@ services:
       - MYSQL_HOST=my-tools-mariadb
       - MYSQL_USER=root
       - MYSQL_PASS=${MARIA_DB_ROOT_PWD}
-      - MAX_BACKUPS=30
-      - INIT_BACKUP=1
+      - MAX_BACKUPS=14
+      - INIT_BACKUP=0
       # Every day at 03:00
       - CRON_TIME=0 3 * * *
       # Make it small
