@@ -70,8 +70,7 @@ services:
       - CRON_TIME=0 3 * * *
       # Make it small
       - GZIP_LEVEL=9
-      # As of MySQL 8.0.21 this is needed
-      - MYSQLDUMP_OPTS=--no-tablespaces --complete-insert --no-create-info --skip-add-drop-table --skip-triggers
+      - MYSQLDUMP_OPTS=--no-tablespaces --routines --triggers --events --single-transaction --quick --add-drop-table
     restart: unless-stopped
 
 volumes:
