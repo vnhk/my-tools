@@ -53,7 +53,7 @@ COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/earth-th
 
 RUN mvn install -Pproduction -DskipTests
 
-FROM openjdk:17 AS runtime
+FROM eclipse-temurin:17-jdk as RUNTIME
 
 WORKDIR /app
 
