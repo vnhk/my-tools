@@ -51,6 +51,7 @@ services:
       - EMAIL_SERVICE_API_SENDER=${EMAIL_SERVICE_API_SENDER}
     ports:
       - "8091:8081"
+      - "80:80"
     depends_on:
       - my-tools-mariadb
 
