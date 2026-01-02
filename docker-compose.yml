@@ -26,7 +26,10 @@ services:
     build: .
     container_name: my-tools-app
     volumes:
-      - ${FILE_SERVICE_STORAGE_FOLDER_HOST}:/app/file-service/storage
+      # SSD1
+      - ${FILE_SERVICE_STORAGE_FOLDER_HOST_PRIMARY}:/app/file-service/storage
+      # SSD2
+      - ${FILE_SERVICE_STORAGE_FOLDER_HOST_SECONDARY}:/app/file-service/storage2
       - ${KEYSTORE_PATH_HOST}:/keystore/keystore.p12
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mariadb://my-tools-mariadb/${MARIA_DB_NAME}
