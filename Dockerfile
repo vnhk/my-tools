@@ -81,4 +81,4 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /app/my-tools-vaadin-app/target/my-tools-vaadin-app.jar ./my-tools-vaadin-app.jar
 COPY --from=builder /app/my-tools-vaadin-app/configuration ./configuration
 
-CMD ["sh","-c","exec java $JAVA_TOOL_OPTIONS -Xms2g -Xmx9g -Dspring.profiles.active=production -jar my-tools-vaadin-app.jar"]
+CMD ["java","-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005","-Xms2g","-Xmx9g","-Dspring.profiles.active=production","-jar","my-tools-vaadin-app.jar"]
