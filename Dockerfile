@@ -45,10 +45,22 @@ COPY ./my-tools-vaadin-app ./my-tools-vaadin-app
 COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-vaadin-app/src/main/resources/static/
 COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-vaadin-app/src/main/resources/static/
 COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/ocean-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/sunset-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/frost-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/blossom-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/intellij-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/bloodmoon-theme.css ./my-tools-vaadin-app/src/main/resources/static/
 
 COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
 COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
 COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/ocean-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/sunset-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/frost-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/blossom-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/intellij-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/bloodmoon-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
 
 
 RUN mvn install -Pproduction -DskipTests
