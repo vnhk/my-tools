@@ -23,6 +23,7 @@
         <module>file-storage-app</module>
         <module>learning-language-app</module>
         <module>shopping-stats-server-app</module>
+        <module>cook-book</module>
     </modules>
 
 </project>
