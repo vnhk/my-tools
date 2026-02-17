@@ -14,7 +14,7 @@ COPY pom.xml .
 COPY common-vaadin/pom.xml common-vaadin/
 COPY shopping-stats-server-app/pom.xml shopping-stats-server-app/
 COPY file-storage-app/pom.xml file-storage-app/
-COPY canvas-app/pom.xml canvas-app/
+COPY cook-book/pom.xml cook-book/
 COPY spreadsheet-app/pom.xml spreadsheet-app/
 COPY invest-track-app/pom.xml invest-track-app/
 COPY interview-app/pom.xml interview-app/
@@ -30,6 +30,7 @@ RUN mvn dependency:go-offline -B
 COPY ./common-vaadin ./common-vaadin
 COPY ./shopping-stats-server-app ./shopping-stats-server-app
 COPY ./file-storage-app ./file-storage-app
+COPY ./cook-book ./cook-book
 COPY ./canvas-app ./canvas-app
 COPY ./spreadsheet-app ./spreadsheet-app
 COPY ./invest-track-app ./invest-track-app
