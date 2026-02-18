@@ -15,6 +15,7 @@ COPY common-vaadin/pom.xml common-vaadin/
 COPY shopping-stats-server-app/pom.xml shopping-stats-server-app/
 COPY file-storage-app/pom.xml file-storage-app/
 COPY cook-book/pom.xml cook-book/
+COPY canvas-app/pom.xml canvas-app/
 COPY spreadsheet-app/pom.xml spreadsheet-app/
 COPY invest-track-app/pom.xml invest-track-app/
 COPY interview-app/pom.xml interview-app/
