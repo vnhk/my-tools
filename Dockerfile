@@ -90,6 +90,7 @@ RUN apt-get update && apt-get install -y \
     libxcb1 \
     libxkbcommon0 \
     libasound2t64 && \
+    ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/my-tools-vaadin-app/target/my-tools-vaadin-app.jar ./my-tools-vaadin-app.jar
