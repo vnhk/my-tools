@@ -89,8 +89,8 @@ RUN apt-get update && apt-get install -y \
     libdrm2 \
     libxcb1 \
     libxkbcommon0 \
+    ffmpeg \
     libasound2t64 && \
-    ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/my-tools-vaadin-app/target/my-tools-vaadin-app.jar ./my-tools-vaadin-app.jar
