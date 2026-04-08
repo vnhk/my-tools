@@ -22,6 +22,7 @@ COPY interview-app/pom.xml interview-app/
 COPY english-text-stats-app/pom.xml english-text-stats-app/
 COPY pocket-app/pom.xml pocket-app/
 COPY project-mgmt-app/pom.xml project-mgmt-app/
+COPY streaming-platform-react/pom.xml streaming-platform-react/
 COPY streaming-platform-app/pom.xml streaming-platform-app/
 COPY learning-language-app/pom.xml learning-language-app/
 COPY my-tools-vaadin-app/pom.xml my-tools-vaadin-app/
@@ -39,6 +40,7 @@ COPY ./interview-app ./interview-app
 COPY ./english-text-stats-app ./english-text-stats-app
 COPY ./pocket-app ./pocket-app
 COPY ./project-mgmt-app ./project-mgmt-app
+COPY ./streaming-platform-react ./streaming-platform-react
 COPY ./streaming-platform-app ./streaming-platform-app
 COPY ./learning-language-app ./learning-language-app
 COPY ./my-tools-vaadin-app ./my-tools-vaadin-app
