@@ -16,6 +16,7 @@
         <module>spreadsheet-app</module>
         <module>project-mgmt-app</module>
         <module>canvas-app</module>
+        <module>streaming-platform-react</module>
         <module>streaming-platform-app</module>
         <module>interview-app</module>
         <module>my-tools-vaadin-app</module>
