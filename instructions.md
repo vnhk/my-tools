@@ -420,11 +420,67 @@ Add entries for:
 
 ---
 
-### E2E Tests (React)
+### E2E Tests (React) — Integration tests against a real backend, NO mocking
 
-* After migrating a module:
-    * Create E2E tests for the React implementation.
-    * Tests must cover main user flows.
+**MANDATORY**: After migrating any view, write integration e2e tests that hit the real backend. Tests with mocked API routes are **forbidden** for new work.
+
+#### Infrastructure
+
+The integration test stack consists of:
+- **Spring Boot backend** started by `ReactE2ETest.java` via `@SpringBootTest` + TestContainers (MariaDB + RabbitMQ), on port 9091 (HTTP).
+- **React dev server** with a proxy to the backend (`vite.integration.config.ts`, `npm run dev:integration`), on port 5173.
+- **Playwright** (`playwright.integration.config.ts`, `testDir: ./e2e/integration/`).
+
+Start everything with one command from `my-tools-react/`:
+```bash
+npm run test:integration
+# which runs: scripts/run-integration-tests.sh
+```
+
+The shell script:
+1. Starts `npm run dev:integration` (Vite → proxies `/api` → `http://localhost:9091`)
+2. Runs `mvn test -Dtest=ReactE2ETest -pl my-tools-vaadin-app` → Spring Boot starts via TestContainers, creates test user, then runs Playwright as a subprocess
+
+#### Test user (created by backend on startup)
+
+`ReactE2ETest.java` calls `createTestUser()` before Playwright runs:
+- username: `testUser`, password: `testUser!2#4%6`
+- Everything else (pockets, tasks, etc.) must be created and torn down by the e2e tests themselves.
+
+#### Writing integration tests
+
+All integration tests go in `my-tools-react/e2e/integration/<module>/` and use the fixtures from `e2e/integration/fixtures.ts`.
+
+**Login**: call `loginViaApi(page)` in `test.beforeEach`. It logs in via `POST /api/auth/login`, gets a real JWT, and stores it in `localStorage` via `addInitScript` so the React app treats the session as authenticated.
+
+```typescript
+import { test, expect, loginViaApi } from '../fixtures'
+
+test.describe('MyModule — integration', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginViaApi(page)
+  })
+
+  test('create item, verify it appears, then delete it', async ({ page }) => {
+    await page.goto('/my-module')
+    await page.getByRole('button', { name: /New/i }).click()
+    await page.getByLabel('Name').fill('E2ETestItem')
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByRole('cell', { name: 'E2ETestItem' })).toBeVisible()
+
+    // cleanup
+    await page.getByRole('row', { name: /E2ETestItem/ }).getByRole('checkbox').check()
+    page.once('dialog', d => d.accept())
+    await page.getByRole('button', { name: 'Delete' }).first().click()
+    await expect(page.getByRole('cell', { name: 'E2ETestItem' })).not.toBeVisible()
+  })
+})
+```
+
+**Naming convention**: Use unique, obviously-test prefixes (e.g. `E2EPocket`, `E2ETask`) so test data is identifiable. Each test must clean up after itself (real database, not wiped between tests within a run).
+
+**Reference**: `e2e/integration/pocket/pocket.spec.ts`
+
 * E2E tests MUST also be listed in this file.
 
 ---
@@ -624,9 +680,13 @@ Add entries for:
 
 ### E2E Tests Created
 
+#### Mocked (legacy — do not add more of these)
 * `e2e/app.spec.ts` — general app smoke test
 * `e2e/pocket/pocket-list.spec.ts` — Pocket: list pockets flow
 * `e2e/projects/project-list.spec.ts` — Projects: list, create, delete project
 * `e2e/projects/project-details.spec.ts` — Projects: detail view, task list, description edit
 * `e2e/projects/task-details.spec.ts` — Projects: task detail, tags, relations, progress
 * `e2e/pocket/pocket-items.spec.ts` — Pocket: items within pocket flow
+
+#### Integration (real backend via TestContainers — add all new tests here)
+* `e2e/integration/pocket/pocket.spec.ts` — Pocket: full CRUD (create pocket, add item, edit, delete)
