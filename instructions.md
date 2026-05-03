@@ -42,6 +42,13 @@ Reference example (MANDATORY):
 - **Safe to use** for entities with no owned collections (e.g. simple entities like `Question`, `Project`... but Project has `Set<Task> tasks`).
 - **Use manual update** for entities **with collections** (e.g. `Task` with `parentRelationships`, `childRelationships`): load the original entity, update only the intended scalar fields, then save. Never use `super.update()` when the entity has `Set<?>` or `List<?>` fields — it will null them out.
 
+#### DTO Files
+
+**Every DTO, request, and response class MUST be in its own separate `.java` file — NO EXCEPTIONS.**
+- Never define DTOs, request objects, or response records as inner classes or `record`s inside a controller.
+- Place all DTO files in the same `api/` package as the controller (e.g. `project-mgmt-app/.../api/TaskDto.java`).
+- Always use @Getter @Setter @NoArgConstructor and @AllArgsConstructor and class. Do not use recrods for dtos.
+
 #### DTO Mapping
 
 **Any entity (model) that is mapped to/from a DTO MUST implement `BaseModel<ID>`** (from `com.bervan.core.model`):
@@ -62,33 +69,112 @@ Only custom/lightweight model classes used as mapping targets need to explicitly
 For **simple fields** (same name + compatible type): no extra code needed — mapped automatically.
 
 For **complex fields** (type conversion, related entity lookup, custom logic):
-- Annotate the DTO field with `@FieldCustomMapper`
+- Annotate the DTO field with `@FieldMapperConfig`
 - Implement `DefaultCustomMapper<FROM, TO>` as a Spring `@Service`
 
-`@FieldCustomMapper` applies **only to the DTO → Model direction** (iterates DTO fields during `mapper.map(dto)`).
-For **Model → DTO with renamed fields** (e.g. `task.project: Project` → `taskDto.projectId: UUID`):
-- The mapper does NOT pick up `@FieldCustomMapper` (it iterates Model fields, not DTO fields)
-- **Prefer `mapper.map(model, DtoClass)` and accept null for renamed fields** if the list/create/update responses don't need those fields (e.g. `projectId` in task list — the list UI doesn't display it)
-- **Use a manual `toXxxDto()` helper** only for detail endpoints that require extra computed data (e.g. `toTaskDetailDto()` builds relation lists — this cannot be done by the mapper)
-- `@FieldCustomMapper` on DTO fields IS used when the DTO is the `from` object (create/update direction)
+##### `@FieldMapperConfig` — Bidirectional
 
-Reference example (MANDATORY):
-- `pocket-app/src/main/java/com/bervan/pocketapp/pocketitem/api/PocketItemCreateRequest.java`
-- `pocket-app/src/main/java/com/bervan/pocketapp/pocketitem/api/ToPocketMapper.java`
+`@FieldMapperConfig` works in **both directions**:
+- **DTO → Model**: annotation on the DTO field; `targetFieldNames` names the model field to write
+- **Model → DTO**: the mapper scans DTO fields looking for `@FieldMapperConfig` whose `targetFieldNames` contains the current model field name — if found, writes to that DTO field
 
+This means annotating a DTO field once covers both create/update (DTO→Model) AND read (Model→DTO).
+
+**Dot-path support in `targetFieldNames`**: use `"project.id"` to read/write nested model fields.
 ```java
-// On DTO field:
-@FieldCustomMapper(mapper = ToPocketMapper.class, targetFieldName = "pocket")
-private String pocketName;
+// In TaskDetailDto — reads task.project.id → projectId, and writes projectId → task.project.id
+@FieldMapperConfig(targetFieldNames = "project.id")
+private UUID projectId;
 
-// Mapper implementation:
+@FieldMapperConfig(targetFieldNames = "project.number")
+private String projectNumber;
+
+@FieldMapperConfig(targetFieldNames = "project.name")
+private String projectName;
+```
+
+**With a custom mapper** (for type conversion or entity lookup):
+```java
+// In TaskCreateRequest — mapper converts UUID → Project entity
+@FieldMapperConfig(mapper = ToProjectMapper.class, targetFieldNames = "project")
+private UUID projectId;
+```
+```java
+// Mapper implementation (updated signature — Field args are required):
 @Service
-public class ToPocketMapper implements DefaultCustomMapper<String, Pocket> {
-    @Override public Pocket map(String pocketName) { ... }
-    @Override public Class<String> getFrom() { return String.class; }
-    @Override public Class<Pocket> getTo() { return Pocket.class; }
+public class ToProjectMapper implements DefaultCustomMapper<UUID, Project> {
+    @Override
+    public Project map(UUID projectId, Field fromField, Field toField) {
+        return projectService.loadById(projectId).orElse(null);
+    }
+    @Override public Class<UUID> getFrom() { return UUID.class; }
+    @Override public Class<Project> getTo() { return Project.class; }
 }
 ```
+
+**Collection accumulation**: if the DTO target field is already a `Collection`, the mapper **adds** to it (not replaces). This lets multiple model fields feed into one DTO list — e.g. `task.parentRelationships` and `task.childRelationships` both accumulate into `dto.someList`.
+
+Reference example:
+- `pocket-app/src/main/java/com/bervan/pocketapp/pocketitem/api/PocketItemCreateRequest.java`
+- `pocket-app/src/main/java/com/bervan/pocketapp/pocketitem/api/ToPocketMapper.java`
+- `project-mgmt-app/.../api/TaskDetailDto.java` (dot-path + PostMapper pattern)
+- `project-mgmt-app/.../api/ToProjectMapper.java`
+
+##### `PreMapper` / `PostMapper` — for complex cases
+
+Use `PreMapper` / `PostMapper` when you need custom logic that runs **before** or **after** the automatic field mapping. Declare them on the DTO class with `@PreCustomMappers` / `@PostCustomMappers`.
+
+**When to use PostMapper** (most common):
+- Combining multiple DTO fields into one (e.g. merging `parentRelationships` + `childRelationships` → `relations`)
+- Post-processing auto-mapped values (setting direction flags, resolving display names, etc.)
+- Any logic that depends on already-mapped fields
+
+```java
+// Declare on the DTO class:
+@PostCustomMappers(mappers = {TaskToDetailsPostMapper.class})
+public class TaskDetailDto {
+    @JsonIgnore
+    private List<TaskRelationDto> parentRelationships; // auto-mapped from task
+    @JsonIgnore
+    private List<TaskRelationDto> childRelationships;  // auto-mapped from task
+    private List<TaskRelationDto> relations;           // populated by PostMapper
+}
+```
+```java
+// PostMapper implementation:
+@Service
+public class TaskToDetailsPostMapper implements PostMapper<Task, TaskDetailDto> {
+    @Override
+    public void map(Task task, TaskDetailDto dto) {
+        List<TaskRelationDto> relations = new ArrayList<>();
+        for (TaskRelationDto r : dto.getParentRelationships()) {
+            r.setDirection("CHILD");
+            // set relatedTask fields from r.getChild()...
+            relations.add(r);
+        }
+        for (TaskRelationDto r : dto.getChildRelationships()) {
+            r.setDirection("PARENT");
+            // set relatedTask fields from r.getParent()...
+            relations.add(r);
+        }
+        dto.setRelations(relations);
+    }
+    @Override public Class<Task> getFromType() { return Task.class; }
+    @Override public Class<TaskDetailDto> getToType() { return TaskDetailDto.class; }
+}
+```
+
+**`PreMapper`** — runs before field mapping; use when the source object needs to be pre-processed or target needs initialization before fields are copied.
+```java
+@Service
+public class MyPreMapper implements PreMapper<MyModel, MyDto> {
+    @Override
+    public void map(MyModel from, MyDto to) { /* initialize to before field mapping */ }
+}
+```
+Declare with: `@PreCustomMappers(mappers = {MyPreMapper.class})` on the DTO class.
+
+**Do NOT write manual `toXxxDto()` helper methods** for complex mappings — use `PostMapper` instead. Manual helpers duplicate logic that the mapper handles automatically and make the mapping non-reusable.
 
 ---
 
