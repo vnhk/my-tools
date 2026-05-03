@@ -62,6 +62,33 @@ public interface BaseModel<ID> {
 `BervanOwnedBaseEntity` already implements `BaseModel<UUID>`, so all standard entities are covered automatically.
 Only custom/lightweight model classes used as mapping targets need to explicitly implement it.
 
+**Any DTO that is the target of auto-mapping (including nested DTOs inside collections) MUST implement `BaseDTO<ID>`**:
+```java
+public interface BaseDTO<ID> {
+    ID getId();
+    void setId(ID id);
+    Class<? extends BaseModel<ID>> dtoTarget(); // tells the mapper which model class this DTO maps to
+}
+```
+This is how the mapper knows what model class to instantiate when mapping a `List<TaskRelation>` → `List<TaskRelationDto>`. Without `BaseDTO`, nested collection elements cannot be auto-mapped.
+
+**Rule**: If a DTO appears as an element type in a `List<?>` or `Set<?>` field of another DTO, it **must** implement `BaseDTO<UUID>` with the correct `dtoTarget()`. Example:
+```java
+// TaskRelationDto is used as List<TaskRelationDto> in TaskDetailDto → must implement BaseDTO
+public class TaskRelationDto implements BaseDTO<UUID> {
+    // ...
+    @Override
+    public Class<? extends BaseModel<UUID>> dtoTarget() {
+        return TaskRelation.class; // the model this DTO maps to
+    }
+}
+```
+And the corresponding model (`TaskRelation`) must also implement `BaseModel<UUID>` — `BervanOwnedBaseEntity` does this, but if a model only extends `BervanOwnedBaseEntity` without overriding the interface, verify it's on the class signature:
+```java
+// If not already covered by BervanOwnedBaseEntity, add explicitly:
+public class TaskRelation extends BervanOwnedBaseEntity<UUID> implements ExcelIEEntity<UUID>, BaseModel<UUID> { ... }
+```
+
 `BaseOwnedController` handles all mapping automatically via `BervanDTOMapper`:
 - **DTO → Model**: `mapper.map(dto)` — used internally in `create()` and `update()`
 - **Model → DTO**: `mapper.map(model, DtoClass.class)` — used internally in `getById()`, `load()`, `create()`, `update()`
