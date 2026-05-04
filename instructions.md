@@ -500,6 +500,14 @@ test.describe('MyModule — integration', () => {
 
 **interview** (`my-tools-vaadin-app`):
 * `InterviewQuestionsView`
+* `InterviewHomeView`
+* `StartInterviewView`
+* `CodingTaskView`
+* `InterviewPlanView`
+* `QuestionConfigView`
+* `InterviewSessionView`
+* `InterviewSessionListView`
+* `ImportExportInterviewDataView`
 
 **invest-track** (`my-tools-vaadin-app`):
 * `BudgetDashboardView`
@@ -564,6 +572,14 @@ test.describe('MyModule — integration', () => {
 
 **interview-app**:
 * `AbstractInterviewQuestionsView`
+* `AbstractInterviewHomeView`
+* `AbstractStartInterviewView`
+* `AbstractCodingTaskView`
+* `AbstractInterviewPlanView`
+* `AbstractQuestionConfigView`
+* `AbstractInterviewSessionView`
+* `AbstractInterviewSessionListView`
+* `AbstractImportExportView`
 
 **invest-track-app**:
 * `AbstractImportExportData`
@@ -593,7 +609,11 @@ test.describe('MyModule — integration', () => {
 ### REST Controllers Created
 
 **interview-app**:
-* `interview-app/.../interviewapp/view/InterviewQuestionsRestController.java`
+* `interview-app/.../interviewapp/view/InterviewQuestionsRestController.java` (+ `/tags` and `/by-tag-difficulty` endpoints)
+* `interview-app/.../interviewapp/api/CodingTaskRestController.java`
+* `interview-app/.../interviewapp/api/QuestionConfigRestController.java`
+* `interview-app/.../interviewapp/api/InterviewSessionRestController.java`
+* `interview-app/.../interviewapp/api/InterviewPlanRestController.java`
 
 **pocket-app**:
 * `pocket-app/.../pocketapp/api/PocketRestController.java`
@@ -635,6 +655,13 @@ test.describe('MyModule — integration', () => {
 
 **interview** (`my-tools-react/src/pages/interview/`):
 * `QuestionListPage.tsx`
+* `CodingTaskListPage.tsx`
+* `QuestionConfigListPage.tsx`
+* `InterviewSessionListPage.tsx`
+* `InterviewSessionPage.tsx`
+* `StartInterviewPage.tsx`
+* `InterviewPlanPage.tsx`
+* `InterviewLayout.tsx`
 
 **invest-track** (`my-tools-react/src/pages/invest-track/`):
 * `DashboardPage.tsx`
