@@ -427,7 +427,7 @@ Add entries for:
 #### Infrastructure
 
 The integration test stack consists of:
-- **Spring Boot backend** started by `ReactE2ETest.java` via `@SpringBootTest` + TestContainers (MariaDB + RabbitMQ), on port 9091 (HTTP).
+- **Spring Boot backend** started by `ReactRunAllE2ETest.java` via `@SpringBootTest` + TestContainers (MariaDB + RabbitMQ), on port 9091 (HTTP).
 - **React dev server** with a proxy to the backend (`vite.integration.config.ts`, `npm run dev:integration`), on port 5173.
 - **Playwright** (`playwright.integration.config.ts`, `testDir: ./e2e/integration/`).
 
@@ -439,11 +439,11 @@ npm run test:integration
 
 The shell script:
 1. Starts `npm run dev:integration` (Vite → proxies `/api` → `http://localhost:9091`)
-2. Runs `mvn test -Dtest=ReactE2ETest -pl my-tools-vaadin-app` → Spring Boot starts via TestContainers, creates test user, then runs Playwright as a subprocess
+2. Runs `mvn test -Dtest=ReactRunAllE2ETest -pl my-tools-vaadin-app` → Spring Boot starts via TestContainers, creates test user, then runs Playwright as a subprocess
 
 #### Test user (created by backend on startup)
 
-`ReactE2ETest.java` calls `createTestUser()` before Playwright runs:
+`ReactRunAllE2ETest.java` calls `createTestUser()` before Playwright runs:
 - username: `testUser`, password: `testUser!2#4%6`
 - Everything else (pockets, tasks, etc.) must be created and torn down by the e2e tests themselves.
 
@@ -717,3 +717,4 @@ test.describe('MyModule — integration', () => {
 
 #### Integration (real backend via TestContainers — add all new tests here)
 * `e2e/integration/pocket/pocket.spec.ts` — Pocket: full CRUD (create pocket, add item, edit, delete)
+* `e2e/integration/interview/interview.spec.ts` — Interview: questions CRUD, coding tasks CRUD, question configs CRUD (including % validation), interview plan save/reload, session list view, full session flow (create via API → open page → score question → complete)
