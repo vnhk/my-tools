@@ -718,3 +718,10 @@ test.describe('MyModule — integration', () => {
 #### Integration (real backend via TestContainers — add all new tests here)
 * `e2e/integration/pocket/pocket.spec.ts` — Pocket: full CRUD (create pocket, add item, edit, delete)
 * `e2e/integration/interview/interview.spec.ts` — Interview: questions CRUD, coding tasks CRUD, question configs CRUD (including % validation), interview plan save/reload, session list view, full session flow (create via API → open page → score question → complete)
+* `e2e/integration/projects/project-list.spec.ts` — Projects: list, create, edit, delete project, search/filter, navigation to details and all-tasks, validation
+* `e2e/integration/projects/project-details.spec.ts` — Projects: project header/stats, inline edit (status, priority, description), task CRUD, search, overdue stat, form validation
+* `e2e/integration/projects/all-tasks.spec.ts` — Projects: all-tasks view, display, navigation to task details, edit/delete task, search/filter, task type icon
+* `e2e/integration/projects/task-details.spec.ts` — Projects: task detail (header, progress, tags, relations), inline edit (status, priority, type, assignee, due date, estimated hours, completion %), add/remove tags, add/remove/search relations, relation group collapse, breadcrumb navigation
+* `e2e/integration/invest-track/wallet.spec.ts` — Invest Track: wallet CRUD (create, edit/rename, delete), navigate to wallet detail and back, validation (missing name), snapshot CRUD (add snapshot, edit, delete)
+* `e2e/integration/invest-track/stock-alerts.spec.ts` — Invest Track: stock alert CRUD (create, edit/rename, delete)
+* `e2e/integration/invest-track/budget-entries.spec.ts` — Invest Track: budget entry create, verify appears, delete
