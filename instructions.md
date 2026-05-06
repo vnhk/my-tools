@@ -541,6 +541,22 @@ test.describe('MyModule — integration', () => {
 * `StatusBadgeHelper`
 * `TaskTypeIconHelper`
 
+**learning-language-app** (`my-tools-vaadin-app`):
+* `EnglishLearningTableView`
+* `EnglishLearningAppLearningView`
+* `EnglishLearningAppQuizView`
+* `EnglishCrosswordView`
+* `EnglishFastImportView`
+* `EnglishImportExportView`
+* `EnglishLearningAppHomeView`
+* `SpanishLearningTableView`
+* `SpanishLearningAppLearningView`
+* `SpanishLearningAppQuizView`
+* `SpanishCrosswordView`
+* `SpanishFastImportView`
+* `SpanishImportExportView`
+* `SpanishLearningAppHomeView`
+
 ---
 
 ### Migrated Components
@@ -592,6 +608,31 @@ test.describe('MyModule — integration', () => {
 * `AbstractAllPocketItemsView`
 * `AbstractPocketView`
 
+**learning-language-app** (module abstract views):
+* `AbstractLearningView`
+* `AbstractQuizView`
+* `AbstractCrosswordView`
+* `AbstractLearningTableView`
+* `AbstractLearningAppHomeView`
+* `AbstractFastImportView`
+* `AbstractImportExportView`
+* `AbstractEnglishLearningView`
+* `AbstractEnglishQuizView`
+* `AbstractEnglishCrosswordView`
+* `AbstractEnglishLearningTableView`
+* `AbstractEnglishLearningAppHomeView`
+* `AbstractEnglishFastImportView`
+* `AbstractEnglishImportExportView`
+* `LearningEnglishLayout`
+* `AbstractSpanishLearningView`
+* `AbstractSpanishQuizView`
+* `AbstractSpanishCrosswordView`
+* `AbstractSpanishLearningTableView`
+* `AbstractSpanishLearningAppHomeView`
+* `AbstractSpanishFastImportView`
+* `AbstractSpanishImportExportView`
+* `LearningSpanishLayout`
+
 ---
 
 ### Migrated Modules
@@ -603,6 +644,7 @@ test.describe('MyModule — integration', () => {
 * `file-storage-app`
 * `streaming-platform-app`
 * `project-mgmt-app`
+* `learning-language-app`
 
 ---
 
@@ -644,6 +686,12 @@ test.describe('MyModule — integration', () => {
 **project-mgmt-app** (in-module, as per rule):
 * `project-mgmt-app/.../projectmgmtapp/api/ProjectRestController.java`
 * `project-mgmt-app/.../projectmgmtapp/api/TaskRestController.java`
+
+**learning-language-app** (in-module, `com.bervan.languageapp.api`):
+* `TranslationRecordRestController` — extends `BaseOwnedController<TranslationRecord, UUID>`; includes flashcards, quiz, review (SM-2), and crossword endpoints
+* `LanguageLearningExternalController` — moved from `my-tools-vaadin-app`; API-key auth; `POST /language-learning/translation` and `POST /language-learning/translate`
+* Note: `TranslationRecord` was updated to implement `BaseModel<UUID>`
+* `CrosswordService` — pure-Java crossword generation algorithm extracted from `AbstractCrosswordView`
 
 ---
 
@@ -703,6 +751,13 @@ test.describe('MyModule — integration', () => {
 * `AllTasksPage.tsx`
 * `TaskDetailsPage.tsx`
 
+**language-learning** (`my-tools-react/src/pages/language-learning/`):
+* `LanguageLearningLayout.tsx` — shared layout for EN and ES (detects language from URL: `/english` → EN, `/spanish` → ES)
+* `WordListPage.tsx` — word table with CRUD (uses `buildColumnsFromConfig('TranslationRecord')`)
+* `FlashcardsPage.tsx` — card flip, SM-2 rating (AGAIN/HARD/GOOD/EASY), keyboard shortcuts (Space/Q/W/E/R/P), Base64 audio playback, level filters
+* `QuizPage.tsx` — word bank fill-in-the-blank quiz, level filters, check answers
+* `CrosswordPage.tsx` — server-generated 15x15 crossword, check/reveal/reset, across/down clues
+
 ---
 
 ### E2E Tests Created
@@ -725,3 +780,4 @@ test.describe('MyModule — integration', () => {
 * `e2e/integration/invest-track/wallet.spec.ts` — Invest Track: wallet CRUD (create, edit/rename, delete), navigate to wallet detail and back, validation (missing name), snapshot CRUD (add snapshot, edit, delete)
 * `e2e/integration/invest-track/stock-alerts.spec.ts` — Invest Track: stock alert CRUD (create, edit/rename, delete)
 * `e2e/integration/invest-track/budget-entries.spec.ts` — Invest Track: budget entry create, verify appears, delete
+* `e2e/integration/language-learning/language-learning.spec.ts` — Language Learning: EN word CRUD (create, edit, delete), validation (missing Text), tab navigation (Words → Flashcards → Quiz → Crossword), ES word CRUD, placeholder UI checks (Flashcards/Quiz/Crossword pages before data loaded)
