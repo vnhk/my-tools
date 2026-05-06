@@ -623,14 +623,14 @@ test.describe('MyModule — integration', () => {
 * `my-tools-vaadin-app/.../views/cookbook/CookBookRestController.java`
 * `my-tools-vaadin-app/.../views/cookbook/DietRestController.java`
 
-**my-tools-vaadin-app — invest-track**:
-* `my-tools-vaadin-app/.../views/investtrackapp/BudgetEntryRestController.java`
-* `my-tools-vaadin-app/.../views/investtrackapp/DataIERestController.java`
-* `my-tools-vaadin-app/.../views/investtrackapp/InvestDashboardRestController.java`
-* `my-tools-vaadin-app/.../views/investtrackapp/InvestmentRecommendationRestController.java`
-* `my-tools-vaadin-app/.../views/investtrackapp/StockAlertRestController.java`
-* `my-tools-vaadin-app/.../views/investtrackapp/StockReportRestController.java`
-* `my-tools-vaadin-app/.../views/investtrackapp/WalletRestController.java`
+**invest-track-app** (in-module, `com.bervan.investtrack.api`):
+* `WalletRestController` — extends `BaseOwnedController<Wallet, UUID>`; includes snapshot sub-resource endpoints
+* `StockAlertRestController` — extends `BaseOwnedController<StockPriceAlert, UUID>`; manual create/update due to nested `StockPriceAlertConfig` + emails collection
+* `BudgetEntryRestController` — plain REST (cannot use `BaseOwnedController`: `BudgetEntry extends BervanBaseEntity`, not `BervanOwnedBaseEntity`)
+* `InvestmentRecommendationRestController` — plain REST (same reason as above)
+* `InvestDashboardRestController` — analytics aggregator, no CRUD entity
+* `StockReportRestController` — async trigger + report reader
+* `DataIERestController` — import/export
 
 **streaming-platform-app**:
 * `streaming-platform-app/.../streamingapp/ProductionsApiController.java`
