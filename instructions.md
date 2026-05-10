@@ -545,6 +545,9 @@ test.describe('MyModule — integration', () => {
 * `EbooksView`
 * `NotLearnedWordsView`
 
+**canvas-app** (`my-tools-vaadin-app`):
+* `CanvasPagesView`
+
 **logs-app** (`my-tools-vaadin-app`):
 * `LogItemsTableView`
 * `TrackersTableView`
@@ -656,6 +659,7 @@ test.describe('MyModule — integration', () => {
 * `learning-language-app`
 * `logs-app` (common-vaadin logging)
 * `english-text-stats-app`
+* `canvas-app`
 
 ---
 
@@ -701,6 +705,11 @@ test.describe('MyModule — integration', () => {
 **english-text-stats-app** (in-module, `com.bervan.englishtextstats.api`):
 * `EbookRestController` — GET `/api/ebook/ebooks` (list), POST (create), DELETE `/{id}`; GET `/api/ebook/not-learned?ebookId=` (top 50 unknown words); POST `/mark-learned`, `/add-flashcard` (EN flashcard via AddFlashcardService); POST `/import-known-words` (multipart CSV)
 * `EbookDto`, `CreateEbookRequest`, `WordRequest`, `WordDto`
+
+**canvas-app** (in-module, `com.bervan.canvas.api`):
+* `CanvasRestController` — GET `/api/canvas` (list, no content), GET `/api/canvas/{id}` (with content), GET `/api/canvas/categories`, POST `/api/canvas` (create), PUT `/api/canvas/{id}` (update name/category/content), DELETE `/api/canvas/{id}` (soft delete)
+* `CanvasDto`, `CanvasDetailDto`, `CreateCanvasRequest`, `UpdateCanvasRequest`
+* Note: manual update used (entity has `Set<HistoryCanvas>` — cannot use `super.update()`)
 
 **common-vaadin — logs** (in-module, `com.bervan.logging.api`):
 * `LogRestController` — read-only REST for logs; GET `/api/logs` (with time/level/process/module filters), GET `/api/logs/trackers` (with text search filters), GET `/api/logs/app-names`, `/process-names`, `/module-names`, `/export` (text file download)
@@ -770,6 +779,9 @@ test.describe('MyModule — integration', () => {
 * `AllTasksPage.tsx`
 * `TaskDetailsPage.tsx`
 
+**canvas** (`my-tools-react/src/pages/canvas/`):
+* `CanvasPage.tsx` — OneNote-style layout: collapsible sidebar with categories → pages; rich text editor (Quill via existing `RichTextEditor` component); auto-save on content change (2s debounce); inline title editing; category "section" pill; page create/delete
+
 **ebook** (`my-tools-react/src/pages/ebook/`):
 * `EbookLayout.tsx` — tabs: "Not Learned Words" / "Ebooks"
 * `NotLearnedWordsPage.tsx` — ebook selector, word grid (top 50), click-to-review dialog with `[` mark learned / `]` add flashcard keyboard shortcuts, auto-advances to next word, CSV bulk import
@@ -811,3 +823,4 @@ test.describe('MyModule — integration', () => {
 * `e2e/integration/invest-track/budget-entries.spec.ts` — Invest Track: budget entry create, verify appears, delete
 * `e2e/integration/language-learning/language-learning.spec.ts` — Language Learning: EN word CRUD (create, edit, delete), validation (missing Text), tab navigation (Words → Flashcards → Quiz → Crossword), ES word CRUD, placeholder UI checks (Flashcards/Quiz/Crossword pages before data loaded)
 * `e2e/integration/ebook/ebook.spec.ts` — Ebook English Stats: tab navigation (Ebooks ↔ Not Learned Words), ebooks page structure (Add button, dialog, ebookName field, cancel), empty-name validation, mark-learned API (POST → 200), add-flashcard API (POST → 200), not-learned-words page structure (Refresh, Upload Known Words buttons)
+* `e2e/integration/canvas/canvas.spec.ts` — Canvas: sidebar visible (New Page button, search), empty state when no page selected, new page dialog (name + section fields, cancel, empty-name validation), full REST CRUD via API (create → 201, get detail, update content → 200, delete → 204, verify gone)
