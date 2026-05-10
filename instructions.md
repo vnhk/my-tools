@@ -548,6 +548,10 @@ test.describe('MyModule — integration', () => {
 **canvas-app** (`my-tools-vaadin-app`):
 * `CanvasPagesView`
 
+**spreadsheet-app** (`my-tools-vaadin-app`):
+* `SpreadsheetView`
+* `SpreadsheetsView`
+
 **logs-app** (`my-tools-vaadin-app`):
 * `LogItemsTableView`
 * `TrackersTableView`
@@ -660,6 +664,7 @@ test.describe('MyModule — integration', () => {
 * `logs-app` (common-vaadin logging)
 * `english-text-stats-app`
 * `canvas-app`
+* `spreadsheet-app`
 
 ---
 
@@ -705,6 +710,11 @@ test.describe('MyModule — integration', () => {
 **english-text-stats-app** (in-module, `com.bervan.englishtextstats.api`):
 * `EbookRestController` — GET `/api/ebook/ebooks` (list), POST (create), DELETE `/{id}`; GET `/api/ebook/not-learned?ebookId=` (top 50 unknown words); POST `/mark-learned`, `/add-flashcard` (EN flashcard via AddFlashcardService); POST `/import-known-words` (multipart CSV)
 * `EbookDto`, `CreateEbookRequest`, `WordRequest`, `WordDto`
+
+**spreadsheet-app** (in-module, `com.bervan.spreadsheet.api`):
+* `SpreadsheetRestController` — GET `/api/spreadsheet` (list), POST (create with 10×5 empty grid), DELETE `/{id}`, PUT `/{id}` (meta update); GET `/{id}/data` (load+evaluate), PUT `/{id}/data` (save body+columnWidths); POST `/{id}/evaluate` (formula eval), POST `/{id}/row` (ADD_ABOVE/ADD_BELOW/DUPLICATE/DELETE), POST `/{id}/column` (ADD_LEFT/ADD_RIGHT/DUPLICATE/DELETE)
+* `SpreadsheetDto`, `SpreadsheetDataDto`, `CreateSpreadsheetRequest`, `SaveDataRequest`, `RowOperationRequest`, `ColumnOperationRequest`, `EvaluateRequest`
+* Note: request rows sent as Gson JSON string (body field) to bypass Jackson deserialization issue with SpreadsheetCell (private fields, no setters)
 
 **canvas-app** (in-module, `com.bervan.canvas.api`):
 * `CanvasRestController` — GET `/api/canvas` (list, no content), GET `/api/canvas/{id}` (with content), GET `/api/canvas/categories`, POST `/api/canvas` (create), PUT `/api/canvas/{id}` (update name/category/content), DELETE `/api/canvas/{id}` (soft delete)
@@ -781,6 +791,10 @@ test.describe('MyModule — integration', () => {
 
 **canvas** (`my-tools-react/src/pages/canvas/`):
 * `CanvasPage.tsx` — OneNote-style layout: collapsible sidebar with categories → pages; rich text editor (Quill via existing `RichTextEditor` component); auto-save on content change (2s debounce); inline title editing; category "section" pill; page create/delete
+
+**spreadsheet** (`my-tools-react/src/pages/spreadsheet/`):
+* `SpreadsheetListPage.tsx` — CRUD list of spreadsheets (DataTable), create dialog with name+description
+* `SpreadsheetEditorPage.tsx` — full spreadsheet editor: HTML table, editable cells (double-click), formula bar, toolbar (Save/Add Row/Add Column/Evaluate/Find&Replace), context menu on row/column headers, server-side formula evaluation
 
 **ebook** (`my-tools-react/src/pages/ebook/`):
 * `EbookLayout.tsx` — tabs: "Not Learned Words" / "Ebooks"
