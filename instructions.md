@@ -541,6 +541,15 @@ test.describe('MyModule — integration', () => {
 * `StatusBadgeHelper`
 * `TaskTypeIconHelper`
 
+**english-text-stats-app** (`my-tools-vaadin-app`):
+* `EbooksView`
+* `NotLearnedWordsView`
+
+**logs-app** (`my-tools-vaadin-app`):
+* `LogItemsTableView`
+* `TrackersTableView`
+* `LogsAppPageLayout`
+
 **learning-language-app** (`my-tools-vaadin-app`):
 * `EnglishLearningTableView`
 * `EnglishLearningAppLearningView`
@@ -645,6 +654,8 @@ test.describe('MyModule — integration', () => {
 * `streaming-platform-app`
 * `project-mgmt-app`
 * `learning-language-app`
+* `logs-app` (common-vaadin logging)
+* `english-text-stats-app`
 
 ---
 
@@ -686,6 +697,14 @@ test.describe('MyModule — integration', () => {
 **project-mgmt-app** (in-module, as per rule):
 * `project-mgmt-app/.../projectmgmtapp/api/ProjectRestController.java`
 * `project-mgmt-app/.../projectmgmtapp/api/TaskRestController.java`
+
+**english-text-stats-app** (in-module, `com.bervan.englishtextstats.api`):
+* `EbookRestController` — GET `/api/ebook/ebooks` (list), POST (create), DELETE `/{id}`; GET `/api/ebook/not-learned?ebookId=` (top 50 unknown words); POST `/mark-learned`, `/add-flashcard` (EN flashcard via AddFlashcardService); POST `/import-known-words` (multipart CSV)
+* `EbookDto`, `CreateEbookRequest`, `WordRequest`, `WordDto`
+
+**common-vaadin — logs** (in-module, `com.bervan.logging.api`):
+* `LogRestController` — read-only REST for logs; GET `/api/logs` (with time/level/process/module filters), GET `/api/logs/trackers` (with text search filters), GET `/api/logs/app-names`, `/process-names`, `/module-names`, `/export` (text file download)
+* `LogDto` — response DTO
 
 **learning-language-app** (in-module, `com.bervan.languageapp.api`):
 * `TranslationRecordRestController` — extends `BaseOwnedController<TranslationRecord, UUID>`; includes flashcards, quiz, review (SM-2), and crossword endpoints
@@ -751,6 +770,16 @@ test.describe('MyModule — integration', () => {
 * `AllTasksPage.tsx`
 * `TaskDetailsPage.tsx`
 
+**ebook** (`my-tools-react/src/pages/ebook/`):
+* `EbookLayout.tsx` — tabs: "Not Learned Words" / "Ebooks"
+* `NotLearnedWordsPage.tsx` — ebook selector, word grid (top 50), click-to-review dialog with `[` mark learned / `]` add flashcard keyboard shortcuts, auto-advances to next word, CSV bulk import
+* `EbooksPage.tsx` — CRUD table for ebooks (just ebookName field)
+
+**logs** (`my-tools-react/src/pages/logs/`):
+* `LogsLayout.tsx` — shared layout with "Logs" / "Trackers" tabs
+* `LogsPage.tsx` — logs viewer: app selector, time filter buttons (5m→7d), log level filter, paginated table, export to text
+* `TrackersPage.tsx` — tracker viewer: app/process/module selectors, className/methodName/message text filters, paginated table
+
 **language-learning** (`my-tools-react/src/pages/language-learning/`):
 * `LanguageLearningLayout.tsx` — shared layout for EN and ES (detects language from URL: `/english` → EN, `/spanish` → ES)
 * `WordListPage.tsx` — word table with CRUD (uses `buildColumnsFromConfig('TranslationRecord')`)
@@ -781,3 +810,4 @@ test.describe('MyModule — integration', () => {
 * `e2e/integration/invest-track/stock-alerts.spec.ts` — Invest Track: stock alert CRUD (create, edit/rename, delete)
 * `e2e/integration/invest-track/budget-entries.spec.ts` — Invest Track: budget entry create, verify appears, delete
 * `e2e/integration/language-learning/language-learning.spec.ts` — Language Learning: EN word CRUD (create, edit, delete), validation (missing Text), tab navigation (Words → Flashcards → Quiz → Crossword), ES word CRUD, placeholder UI checks (Flashcards/Quiz/Crossword pages before data loaded)
+* `e2e/integration/ebook/ebook.spec.ts` — Ebook English Stats: tab navigation (Ebooks ↔ Not Learned Words), ebooks page structure (Add button, dialog, ebookName field, cancel), empty-name validation, mark-learned API (POST → 200), add-flashcard API (POST → 200), not-learned-words page structure (Refresh, Upload Known Words buttons)
