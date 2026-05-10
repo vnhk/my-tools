@@ -23,5 +23,16 @@ for folder in $folders; do
   fi
 done
 
+# Pull latest React frontend
+if [ -d "../my-tools-react" ]; then
+  cd "../my-tools-react"
+  echo "Processing folder: my-tools-react"
+  git stash
+  git pull
+  cd "$initial_dir"
+else
+  echo "Folder not found: ../my-tools-react"
+fi
+
 cd "$initial_dir"
 docker-compose --env-file .env_my_tools up --build -d

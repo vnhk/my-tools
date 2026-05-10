@@ -58,10 +58,19 @@ services:
       - FILE_SERVICE_STORAGE_AUTOMAPPING=${FILE_SERVICE_STORAGE_AUTOMAPPING}
     ports:
       - "8091:8081"
-      - "80:80"
       - "5005:5005"
     depends_on:
       - my-tools-mariadb
+
+  my-tools-react:
+    build:
+      context: ../my-tools-react
+      dockerfile: Dockerfile
+    container_name: my-tools-react
+    ports:
+      - "80:80"
+    depends_on:
+      - my-tools-app
 
   mysql-cron-backup:
     image: fradelg/mysql-cron-backup
