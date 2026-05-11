@@ -878,3 +878,19 @@ test.describe('MyModule — integration', () => {
 * `e2e/integration/canvas/canvas.spec.ts` — Canvas: sidebar visible (New Page button, search), empty state when no page selected, new page dialog (name + section fields, cancel, empty-name validation), full REST CRUD via API (create → 201, get detail, update content → 200, delete → 204, verify gone)
 * `e2e/integration/shopping/shopping.spec.ts` — Shopping Stats: navigation (products page, tabs, search bar), product search empty state, best-offers page structure, product alerts CRUD (create via API, verify in UI, delete), shop config CRUD (create via API, verify, delete), dialog fields, scrap audit date filter buttons, REST API checks (categories → 200, alerts/shops/configs/audits/best-offers → 200 with correct response shape)
 * `e2e/integration/invest-track/budget-tree.spec.ts` — Budget Tree: navigation (page loads, tab visible), empty state with future date range, auto-expand first month, expand-all/collapse-all interaction (via API-created entry), REST API structure check (array with key/label/totalPln/entryType/categories), entry appears in correct month
+
+---
+
+### Not-Yet-Migrated Vaadin Views (Pending React Migration)
+
+These classes are intentionally **NOT** marked `@Deprecated` because they have no React equivalent yet.
+
+| Class | Module | Notes |
+|-------|--------|-------|
+| `AppShell.java` | `my-tools-vaadin-app` | Vaadin bootstrap — required while Vaadin app runs |
+| `SecurityConfig.java` | `my-tools-vaadin-app` | Spring Security — also used by REST API, must remain |
+| ~~`QRLoginView.java`~~ | `my-tools-vaadin-app` | Migrated → `LoginPage.tsx` (QR tab) + `AcceptLoginPage.tsx` |
+| ~~`AcceptQRLoginPage.java`~~ | `my-tools-vaadin-app` | Migrated → `AcceptLoginPage.tsx` |
+| ~~`QRLoginService.java`~~ | `my-tools-vaadin-app` | Replaced by QR endpoints in `AuthController.java` |
+| ~~`SettingsView.java`~~ | `my-tools-vaadin-app` | Migrated → `SettingsPage.tsx` (cipher check/save + theme picker) |
+| ~~`OTPGenerateView.java`~~ | `my-tools-vaadin-app` | Migrated → `OtpGeneratePage.tsx` |
