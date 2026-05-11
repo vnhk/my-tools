@@ -11,7 +11,7 @@ RUN mvn install:install-file -Dfile=./history-tables-core.jar -DgroupId=com.berv
 RUN mvn install:install-file -Dfile=./ie-entities.jar -DgroupId=com.bervan -DartifactId=ie-entities -Dversion=latest -Dpackaging=jar -DgeneratePom=true
 
 COPY pom.xml .
-COPY common-vaadin/pom.xml common-vaadin/
+COPY common/pom.xml common/
 COPY shopping-stats-server-app/pom.xml shopping-stats-server-app/
 COPY file-storage-app/pom.xml file-storage-app/
 COPY cook-book/pom.xml cook-book/
@@ -25,11 +25,11 @@ COPY project-mgmt-app/pom.xml project-mgmt-app/
 COPY streaming-platform-react/pom.xml streaming-platform-react/
 COPY streaming-platform-app/pom.xml streaming-platform-app/
 COPY learning-language-app/pom.xml learning-language-app/
-COPY my-tools-vaadin-app/pom.xml my-tools-vaadin-app/
+COPY my-tools-app/pom.xml my-tools-app/
 
 RUN mvn dependency:go-offline -B
 
-COPY ./common-vaadin ./common-vaadin
+COPY ./common ./common
 COPY ./shopping-stats-server-app ./shopping-stats-server-app
 COPY ./file-storage-app ./file-storage-app
 COPY ./cook-book ./cook-book
@@ -43,28 +43,28 @@ COPY ./project-mgmt-app ./project-mgmt-app
 COPY ./streaming-platform-react ./streaming-platform-react
 COPY ./streaming-platform-app ./streaming-platform-app
 COPY ./learning-language-app ./learning-language-app
-COPY ./my-tools-vaadin-app ./my-tools-vaadin-app
+COPY ./my-tools-app ./my-tools-app
 
 #themes manual copy to all required directions
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-vaadin-app/src/main/resources/static/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-vaadin-app/src/main/resources/static/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-vaadin-app/src/main/resources/static/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/ocean-theme.css ./my-tools-vaadin-app/src/main/resources/static/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/sunset-theme.css ./my-tools-vaadin-app/src/main/resources/static/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/frost-theme.css ./my-tools-vaadin-app/src/main/resources/static/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/blossom-theme.css ./my-tools-vaadin-app/src/main/resources/static/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/intellij-theme.css ./my-tools-vaadin-app/src/main/resources/static/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/bloodmoon-theme.css ./my-tools-vaadin-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/ocean-theme.css ./my-tools-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/sunset-theme.css ./my-tools-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/frost-theme.css ./my-tools-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/blossom-theme.css ./my-tools-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/intellij-theme.css ./my-tools-app/src/main/resources/static/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/bloodmoon-theme.css ./my-tools-app/src/main/resources/static/
 
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/ocean-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/sunset-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/frost-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/blossom-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/intellij-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
-COPY ./my-tools-vaadin-app/src/main/resources/META-INF/resources/static/bloodmoon-theme.css ./my-tools-vaadin-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/ocean-theme.css ./my-tools-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/sunset-theme.css ./my-tools-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/frost-theme.css ./my-tools-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/blossom-theme.css ./my-tools-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/intellij-theme.css ./my-tools-app/src/main/frontend/themes/
+COPY ./my-tools-app/src/main/resources/META-INF/resources/static/bloodmoon-theme.css ./my-tools-app/src/main/frontend/themes/
 
 
 RUN mvn install -Pproduction -DskipTests
@@ -95,7 +95,7 @@ RUN apt-get update && apt-get install -y \
     libasound2t64 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/my-tools-vaadin-app/target/my-tools-vaadin-app.jar ./my-tools-vaadin-app.jar
-COPY --from=builder /app/my-tools-vaadin-app/configuration ./configuration
+COPY --from=builder /app/my-tools-app/target/my-tools-app.jar ./my-tools-app.jar
+COPY --from=builder /app/my-tools-app/configuration ./configuration
 
-CMD ["sh", "-c", "exec java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -Xms2g -Xmx9g -Dspring.profiles.active=production -jar my-tools-vaadin-app.jar"]
+CMD ["sh", "-c", "exec java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -Xms2g -Xmx9g -Dspring.profiles.active=production -jar my-tools-app.jar"]

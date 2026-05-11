@@ -1,17 +1,8 @@
 # Instructions for AI model
 
-## Migration from Vaadin to React
+## Development Guide
 
-### General Rules
-- All Vaadin views MUST be migrated to React (100% coverage required).
-- After migrating any view, ALWAYS double-check that the migration is complete and correct.
-- Do NOT skip any view or component.
-- Migration must be consistent across the entire project.
-- Update this document as needed.
-
----
-
-### Backend Migration (Vaadin → REST)
+### Backend REST Controllers
 
 To implement a controller, ALWAYS use:
 - `BaseOwnedController`
@@ -22,10 +13,8 @@ Reference example (MANDATORY):
 - `/pocket-app/src/main/java/com/bervan/pocketapp/pocketitem/api/PocketItemRestController.java`
 
 #### Rules:
-- Convert Vaadin Views into REST Controllers.
-- REST controllers MUST be placed in the **module itself** (e.g. `project-mgmt-app/api/`), NOT in `my-tools-vaadin-app`.
-  - `my-tools-vaadin-app` is integration/deployment only — modules must be self-sufficient.
-  - All modules have `spring-web` available transitively via `vaadin-spring-boot-starter`.
+- REST controllers MUST be placed in the **module itself** (e.g. `project-mgmt-app/api/`), NOT in `my-tools-app`.
+  - `my-tools-app` is integration/deployment only — modules must be self-sufficient.
 - ALWAYS follow the provided example.
 - DO NOT invent your own patterns.
 - If the example does NOT cover required functionality:
@@ -205,7 +194,7 @@ Declare with: `@PreCustomMappers(mappers = {MyPreMapper.class})` on the DTO clas
 
 ---
 
-### Frontend Migration (Vaadin → React)
+### Frontend (React)
 #### React project structure
 Path: ~/IdeaProjects/my-tools-react
 [src](../my-tools-react/src)
@@ -324,18 +313,13 @@ Auto-generates form fields from backend YML config. Use together with `buildColu
 ```
 
 #### Rules:
-- Every Vaadin View must have a corresponding React implementation.
-- Do NOT partially migrate components — full migration required.
-
-#### React Table Views (from `AbstractBervanTableView`)
-If the Vaadin view extended `AbstractBervanTableView` (or any subclass):
+#### React Table Views
 - React table columns MUST be built with `buildColumnsFromConfig<T>('EntityName', overrides)` — values come from the backend YML autoconfig files.
 - Create/Edit forms MUST use `<DynamicForm entityName="EntityName" mode="save"|"edit" .../>` — fields come from the same YML.
 - Do NOT hardcode column names or form fields; they are defined in `src/main/resources/autoconfig/*.yml`.
 - See `PocketListPage.tsx` as the reference example for this pattern.
 
-#### React Detail Views (from `AbstractPageView`)
-If the Vaadin view extended `AbstractPageView` (custom detail/edit page):
+#### React Detail Views
 - Implement custom inline editing in React (click-to-edit fields, auto-save on blur/Enter).
 - Use the existing `InlineEditableField` component from `components/ui/InlineEditableField.tsx`.
 - See `RecipeDetailPage.tsx` as a reference for inline editing patterns.
@@ -392,34 +376,6 @@ If a variable for a needed value does not yet exist, **add it to `variables.css`
 
 ---
 
-### Deprecation Rules
-
-After successful migration:
-
-- The original Vaadin class (View or Component) MUST be marked as:
-```java
-@Deprecated
-```
-* The annotation must be applied to the ENTIRE class.
-
----
-
-### Migration Tracking (THIS FILE)
-
-* Every migrated element MUST be added to this .md file.
-* This file must be continuously UPDATED.
-
-Add entries for:
-
-* Migrated Views
-* Migrated Components
-* Migrated Modules
-* Created REST Controllers
-* Created React Views
-* Created E2E Tests
-
----
-
 ### E2E Tests (React) — Integration tests against a real backend, NO mocking
 
 **MANDATORY**: After migrating any view, write integration e2e tests that hit the real backend. Tests with mocked API routes are **forbidden** for new work.
@@ -439,7 +395,7 @@ npm run test:integration
 
 The shell script:
 1. Starts `npm run dev:integration` (Vite → proxies `/api` → `http://localhost:9091`)
-2. Runs `mvn test -Dtest=ReactRunAllE2ETest -pl my-tools-vaadin-app` → Spring Boot starts via TestContainers, creates test user, then runs Playwright as a subprocess
+2. Runs `mvn test -Dtest=ReactRunAllE2ETest -pl my-tools-app` → Spring Boot starts via TestContainers, creates test user, then runs Playwright as a subprocess
 
 #### Test user (created by backend on startup)
 
@@ -485,11 +441,11 @@ test.describe('MyModule — integration', () => {
 
 ---
 
-## Migration Log
+## Architecture Log
 
-### Migrated Views
+### Views (React)
 
-**cook-book** (`my-tools-vaadin-app`):
+**cook-book** (`my-tools-app`):
 * `DietDashboardView`
 * `DietView`
 * `IngredientListView`
@@ -498,7 +454,7 @@ test.describe('MyModule — integration', () => {
 * `RecipeSearchView`
 * `ShoppingCartView`
 
-**interview** (`my-tools-vaadin-app`):
+**interview** (`my-tools-app`):
 * `InterviewQuestionsView`
 * `InterviewHomeView`
 * `StartInterviewView`
@@ -509,7 +465,7 @@ test.describe('MyModule — integration', () => {
 * `InterviewSessionListView`
 * `ImportExportInterviewDataView`
 
-**shopping-stats-server-app** (`my-tools-vaadin-app`):
+**shopping-stats-server-app** (`my-tools-app`):
 * `BestOffersView`
 * `ProductAlertsView`
 * `ProductConfigView`
@@ -518,7 +474,7 @@ test.describe('MyModule — integration', () => {
 * `ScrapAuditView`
 * `ShopConfigView`
 
-**invest-track** (`my-tools-vaadin-app`):
+**invest-track** (`my-tools-app`):
 * `BudgetView`
 * `BudgetDashboardView`
 * `ImportExportDataView`
@@ -528,13 +484,13 @@ test.describe('MyModule — integration', () => {
 * `StockAlertViewStock`
 * `WalletView`
 
-**pocket** (`my-tools-vaadin-app`):
+**pocket** (`my-tools-app`):
 * `PocketItemsListView`
 * `PocketItemsTableView`
 * `PocketSideMenuView`
 * `PocketTableView`
 
-**project-mgmt-app** (`my-tools-vaadin-app`):
+**project-mgmt-app** (`my-tools-app`):
 * `ProjectListView`
 * `ProjectDetailsView`
 * `AllTasksListView`
@@ -551,27 +507,27 @@ test.describe('MyModule — integration', () => {
 * `StatusBadgeHelper`
 * `TaskTypeIconHelper`
 
-**async-tasks** (`my-tools-vaadin-app`):
+**async-tasks** (`my-tools-app`):
 * `AsyncTaskListView`
 * `AsyncTaskDetailsView`
 
-**english-text-stats-app** (`my-tools-vaadin-app`):
+**english-text-stats-app** (`my-tools-app`):
 * `EbooksView`
 * `NotLearnedWordsView`
 
-**canvas-app** (`my-tools-vaadin-app`):
+**canvas-app** (`my-tools-app`):
 * `CanvasPagesView`
 
-**spreadsheet-app** (`my-tools-vaadin-app`):
+**spreadsheet-app** (`my-tools-app`):
 * `SpreadsheetView`
 * `SpreadsheetsView`
 
-**logs-app** (`my-tools-vaadin-app`):
+**logs-app** (`my-tools-app`):
 * `LogItemsTableView`
 * `TrackersTableView`
 * `LogsAppPageLayout`
 
-**learning-language-app** (`my-tools-vaadin-app`):
+**learning-language-app** (`my-tools-app`):
 * `EnglishLearningTableView`
 * `EnglishLearningAppLearningView`
 * `EnglishLearningAppQuizView`
@@ -591,7 +547,7 @@ test.describe('MyModule — integration', () => {
 
 ### Migrated Components
 
-**common-vaadin**:
+**common**:
 * `BervanImageViewer`
 * `BervanJsonLogViewer`
 * `AbstractAsyncTaskDetails`
@@ -675,7 +631,7 @@ test.describe('MyModule — integration', () => {
 * `streaming-platform-app`
 * `project-mgmt-app`
 * `learning-language-app`
-* `logs-app` (common-vaadin logging)
+* `logs-app` (common logging)
 * `english-text-stats-app`
 * `canvas-app`
 * `spreadsheet-app`
@@ -696,9 +652,9 @@ test.describe('MyModule — integration', () => {
 * `pocket-app/.../pocketapp/api/PocketRestController.java`
 * `pocket-app/.../pocketapp/pocketitem/api/PocketItemRestController.java`
 
-**my-tools-vaadin-app — cook-book**:
-* `my-tools-vaadin-app/.../views/cookbook/CookBookRestController.java`
-* `my-tools-vaadin-app/.../views/cookbook/DietRestController.java`
+**my-tools-app — cook-book**:
+* `my-tools-app/.../views/cookbook/CookBookRestController.java`
+* `my-tools-app/.../views/cookbook/DietRestController.java`
 
 **invest-track-app** (in-module, `com.bervan.investtrack.api`):
 * `WalletRestController` — extends `BaseOwnedController<Wallet, UUID>`; includes snapshot sub-resource endpoints
@@ -736,8 +692,8 @@ test.describe('MyModule — integration', () => {
 * `CanvasDto`, `CanvasDetailDto`, `CreateCanvasRequest`, `UpdateCanvasRequest`
 * Note: manual update used (entity has `Set<HistoryCanvas>` — cannot use `super.update()`)
 
-**common-vaadin — async tasks** (exception: placed in `my-tools-vaadin-app` because `AsyncTask` lives in `common-vaadin`, not a standalone module):
-* `my-tools-vaadin-app/.../views/asynctask/AsyncTaskRestController.java` — GET `/api/async/async-tasks` (paginated list), GET `/api/async/async-tasks/{id}` (single task), GET `/api/async/async-tasks/{id}/history` (paginated history filtered by task id); read-only, uses inline `record` DTOs (no BervanDTOMapper needed)
+**common — async tasks** (exception: placed in `my-tools-app` because `AsyncTask` lives in `common`, not a standalone module):
+* `my-tools-app/.../views/asynctask/AsyncTaskRestController.java` — GET `/api/async/async-tasks` (paginated list), GET `/api/async/async-tasks/{id}` (single task), GET `/api/async/async-tasks/{id}/history` (paginated history filtered by task id); read-only, uses inline `record` DTOs (no BervanDTOMapper needed)
 
 **shopping-stats-server-app** (in-module, `com.bervan.shstat`):
 * `ShoppingApiController` — GET `/api/shopping/products` (paginated search), GET `/api/shopping/products/{id}` (single product), GET `/api/shopping/products/categories`; GET `/api/shopping/best-offers` (discount search); full CRUD: `/api/shopping/product-alerts`, `/api/shopping/shop-configs`, `/api/shopping/product-configs`; read+delete: `/api/shopping/scrap-audits`
@@ -748,13 +704,13 @@ test.describe('MyModule — integration', () => {
 **invest-track-app** (in-module, `com.bervan.investtrack.api`):
 * `BudgetTreeRestController` — GET `/api/invest-track/budget-tree?startDate=&endDate=` — returns JSON tree: list of MonthDto → CategoryDto → EntryDto; groups budget entries by month→category; converts amounts to PLN; returns balance type (Income/Expense) per month and category
 
-**common-vaadin — logs** (in-module, `com.bervan.logging.api`):
+**common — logs** (in-module, `com.bervan.logging.api`):
 * `LogRestController` — read-only REST for logs; GET `/api/logs` (with time/level/process/module filters), GET `/api/logs/trackers` (with text search filters), GET `/api/logs/app-names`, `/process-names`, `/module-names`, `/export` (text file download)
 * `LogDto` — response DTO
 
 **learning-language-app** (in-module, `com.bervan.languageapp.api`):
 * `TranslationRecordRestController` — extends `BaseOwnedController<TranslationRecord, UUID>`; includes flashcards, quiz, review (SM-2), and crossword endpoints
-* `LanguageLearningExternalController` — moved from `my-tools-vaadin-app`; API-key auth; `POST /language-learning/translation` and `POST /language-learning/translate`
+* `LanguageLearningExternalController` — moved from `my-tools-app`; API-key auth; `POST /language-learning/translation` and `POST /language-learning/translate`
 * Note: `TranslationRecord` was updated to implement `BaseModel<UUID>`
 * `CrosswordService` — pure-Java crossword generation algorithm extracted from `AbstractCrosswordView`
 
@@ -879,18 +835,3 @@ test.describe('MyModule — integration', () => {
 * `e2e/integration/shopping/shopping.spec.ts` — Shopping Stats: navigation (products page, tabs, search bar), product search empty state, best-offers page structure, product alerts CRUD (create via API, verify in UI, delete), shop config CRUD (create via API, verify, delete), dialog fields, scrap audit date filter buttons, REST API checks (categories → 200, alerts/shops/configs/audits/best-offers → 200 with correct response shape)
 * `e2e/integration/invest-track/budget-tree.spec.ts` — Budget Tree: navigation (page loads, tab visible), empty state with future date range, auto-expand first month, expand-all/collapse-all interaction (via API-created entry), REST API structure check (array with key/label/totalPln/entryType/categories), entry appears in correct month
 
----
-
-### Not-Yet-Migrated Vaadin Views (Pending React Migration)
-
-These classes are intentionally **NOT** marked `@Deprecated` because they have no React equivalent yet.
-
-| Class | Module | Notes |
-|-------|--------|-------|
-| `AppShell.java` | `my-tools-vaadin-app` | Vaadin bootstrap — required while Vaadin app runs |
-| `SecurityConfig.java` | `my-tools-vaadin-app` | Spring Security — also used by REST API, must remain |
-| ~~`QRLoginView.java`~~ | `my-tools-vaadin-app` | Migrated → `LoginPage.tsx` (QR tab) + `AcceptLoginPage.tsx` |
-| ~~`AcceptQRLoginPage.java`~~ | `my-tools-vaadin-app` | Migrated → `AcceptLoginPage.tsx` |
-| ~~`QRLoginService.java`~~ | `my-tools-vaadin-app` | Replaced by QR endpoints in `AuthController.java` |
-| ~~`SettingsView.java`~~ | `my-tools-vaadin-app` | Migrated → `SettingsPage.tsx` (cipher check/save + theme picker) |
-| ~~`OTPGenerateView.java`~~ | `my-tools-vaadin-app` | Migrated → `OtpGeneratePage.tsx` |

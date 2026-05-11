@@ -1,21 +1,17 @@
-# Vaadin Spring Boot Multi Module Example
+# My Tools — Spring Boot Multi Module Backend
 
-
-This project is a multi-module Vaadin + Spring Boot project. It consists of two modules:
-
-<ol>
-  <li>backend: includes JPA entities, repos, and services</li>
-  <li>vaadin-app: is the actual runnable application that depends on the backend library</li>
-</ol>
+Multi-module Maven project (`com.bervan:my-tools`) — a suite of personal productivity applications.
+Backend is pure Spring Boot (REST API). Frontend is React (`my-tools-react`).
 
 ## Running the project
 
-From the root directory, run
-```terminal
-mvn install
+```bash
+mvn clean install -DskipTests
+mvn spring-boot:run -pl my-tools-app
 ```
 
-then to start the project, run
-```terminal
-mvn spring-boot:run -pl vaadin-app
+## Docker
+
+```bash
+docker-compose --env-file .env_my_tools up --build -d
 ```

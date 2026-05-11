@@ -3,13 +3,13 @@
 > **IMPORTANT**: Keep this file updated when making significant changes to the codebase. This file serves as persistent memory between Claude Code sessions.
 
 ## Overview
-Multi-module Maven project (`com.bervan:my-tools`) — a suite of personal productivity and lifestyle applications built on a shared Spring Boot + Vaadin framework. All modules share common infrastructure from `common-vaadin` and `core` libraries.
+Multi-module Maven project (`com.bervan:my-tools`) — a suite of personal productivity and lifestyle applications built on Spring Boot (REST API). Frontend is React (`my-tools-react`). All modules share common infrastructure from `common` and `core` libraries.
 
 ## Modules
 
 | Module | Description |
 |--------|-------------|
-| `common-vaadin` | Shared Vaadin base components, services, auth, search |
+| `common` | Shared base components, services, auth, search |
 | `pocket-app` | Personal note storage with encrypted items in "pockets" |
 | `invest-track-app` | Investment portfolio tracking, FIRE projections, budget management |
 | `spreadsheet-app` | Browser-based spreadsheet editor with formula support |
@@ -17,7 +17,7 @@ Multi-module Maven project (`com.bervan:my-tools`) — a suite of personal produ
 | `canvas-app` | Collaborative canvas/notebook with draggable elements |
 | `streaming-platform-app` | Video streaming platform |
 | `interview-app` | Technical interview management and live interview conductor |
-| `my-tools-vaadin-app` | Main deployable Vaadin app integrating all modules |
+| `my-tools-app` | Main deployable app integrating all modules |
 | `english-text-stats-app` | Ebook/text analysis for vocabulary learning |
 | `file-storage-app` | File manager: disk storage + DB metadata |
 | `learning-language-app` | Flashcard-based language learning |
@@ -27,7 +27,7 @@ Multi-module Maven project (`com.bervan:my-tools`) — a suite of personal produ
 ## Shared Architecture Patterns
 
 All modules follow the same conventions:
-- **Framework**: Spring Boot 3.0.4 + Vaadin 24.4.8 + Java 17
+- **Framework**: Spring Boot 3.0.4 + Java 17
 - **Persistence**: Spring Data JPA, TABLE_PER_CLASS inheritance
 - **Entities**: Extend `BervanOwnedBaseEntity` (multi-tenancy), `deleted` flag (soft deletes)
 - **History**: `@HistorySupported` annotation + `Set<History*>` for audit trail
@@ -53,10 +53,10 @@ Each module has its own `CLAUDE.md` with detailed architecture notes:
 - See `shopping-stats-server-app/CLAUDE.md`, `spreadsheet-app/CLAUDE.md`
 - See `invest-track-app/CLAUDE.md`, `learning-language-app/CLAUDE.md`
 - See `streaming-platform-app/CLAUDE.md`, `project-mgmt-app/CLAUDE.md`
-- See `my-tools-vaadin-app/CLAUDE.md`, `common-vaadin/CLAUDE.md`
+- See `my-tools-app/CLAUDE.md`, `common/CLAUDE.md`
 
 ## Important Notes
-1. All modules depend on `common-vaadin` which must be built first
+1. All modules depend on `common` which must be built first
 2. Docker: each module has a multi-stage Dockerfile; root `docker-compose.yml` for full stack
 3. `env_my_tools` — environment configuration file
 4. External scraper modules in `profile-stealth/` (shopping-stats scraper)
