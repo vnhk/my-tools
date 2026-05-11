@@ -541,6 +541,10 @@ test.describe('MyModule — integration', () => {
 * `StatusBadgeHelper`
 * `TaskTypeIconHelper`
 
+**async-tasks** (`my-tools-vaadin-app`):
+* `AsyncTaskListView`
+* `AsyncTaskDetailsView`
+
 **english-text-stats-app** (`my-tools-vaadin-app`):
 * `EbooksView`
 * `NotLearnedWordsView`
@@ -720,6 +724,9 @@ test.describe('MyModule — integration', () => {
 * `CanvasRestController` — GET `/api/canvas` (list, no content), GET `/api/canvas/{id}` (with content), GET `/api/canvas/categories`, POST `/api/canvas` (create), PUT `/api/canvas/{id}` (update name/category/content), DELETE `/api/canvas/{id}` (soft delete)
 * `CanvasDto`, `CanvasDetailDto`, `CreateCanvasRequest`, `UpdateCanvasRequest`
 * Note: manual update used (entity has `Set<HistoryCanvas>` — cannot use `super.update()`)
+
+**common-vaadin — async tasks** (exception: placed in `my-tools-vaadin-app` because `AsyncTask` lives in `common-vaadin`, not a standalone module):
+* `my-tools-vaadin-app/.../views/asynctask/AsyncTaskRestController.java` — GET `/api/async/async-tasks` (paginated list), GET `/api/async/async-tasks/{id}` (single task), GET `/api/async/async-tasks/{id}/history` (paginated history filtered by task id); read-only, uses inline `record` DTOs (no BervanDTOMapper needed)
 
 **common-vaadin — logs** (in-module, `com.bervan.logging.api`):
 * `LogRestController` — read-only REST for logs; GET `/api/logs` (with time/level/process/module filters), GET `/api/logs/trackers` (with text search filters), GET `/api/logs/app-names`, `/process-names`, `/module-names`, `/export` (text file download)
