@@ -509,7 +509,17 @@ test.describe('MyModule — integration', () => {
 * `InterviewSessionListView`
 * `ImportExportInterviewDataView`
 
+**shopping-stats-server-app** (`my-tools-vaadin-app`):
+* `BestOffersView`
+* `ProductAlertsView`
+* `ProductConfigView`
+* `ProductView`
+* `ProductsView`
+* `ScrapAuditView`
+* `ShopConfigView`
+
 **invest-track** (`my-tools-vaadin-app`):
+* `BudgetView`
 * `BudgetDashboardView`
 * `ImportExportDataView`
 * `InvestmentRecommendationView`
@@ -669,6 +679,7 @@ test.describe('MyModule — integration', () => {
 * `english-text-stats-app`
 * `canvas-app`
 * `spreadsheet-app`
+* `shopping-stats-server-app`
 
 ---
 
@@ -728,6 +739,15 @@ test.describe('MyModule — integration', () => {
 **common-vaadin — async tasks** (exception: placed in `my-tools-vaadin-app` because `AsyncTask` lives in `common-vaadin`, not a standalone module):
 * `my-tools-vaadin-app/.../views/asynctask/AsyncTaskRestController.java` — GET `/api/async/async-tasks` (paginated list), GET `/api/async/async-tasks/{id}` (single task), GET `/api/async/async-tasks/{id}/history` (paginated history filtered by task id); read-only, uses inline `record` DTOs (no BervanDTOMapper needed)
 
+**shopping-stats-server-app** (in-module, `com.bervan.shstat`):
+* `ShoppingApiController` — GET `/api/shopping/products` (paginated search), GET `/api/shopping/products/{id}` (single product), GET `/api/shopping/products/categories`; GET `/api/shopping/best-offers` (discount search); full CRUD: `/api/shopping/product-alerts`, `/api/shopping/shop-configs`, `/api/shopping/product-configs`; read+delete: `/api/shopping/scrap-audits`
+* Uses `ProductViewService`, `DiscountsViewService`, `ProductSearchService`, `ProductAlertService`, `ShopConfigService`, `ProductConfigService`, `ScrapAuditService`
+* `ProductAlert` extends `BervanOwnedBaseEntity<Long>` (owned, user-filtered); others extend `BervanBaseEntity<Long>` (not owned, must use `setAddOwnerCriterion(false)`)
+* Added `setName()` to `ProductConfig` entity (was missing)
+
+**invest-track-app** (in-module, `com.bervan.investtrack.api`):
+* `BudgetTreeRestController` — GET `/api/invest-track/budget-tree?startDate=&endDate=` — returns JSON tree: list of MonthDto → CategoryDto → EntryDto; groups budget entries by month→category; converts amounts to PLN; returns balance type (Income/Expense) per month and category
+
 **common-vaadin — logs** (in-module, `com.bervan.logging.api`):
 * `LogRestController` — read-only REST for logs; GET `/api/logs` (with time/level/process/module filters), GET `/api/logs/trackers` (with text search filters), GET `/api/logs/app-names`, `/process-names`, `/module-names`, `/export` (text file download)
 * `LogDto` — response DTO
@@ -761,10 +781,21 @@ test.describe('MyModule — integration', () => {
 * `WalletListPage.tsx`
 * `WalletDetailPage.tsx`
 * `BudgetEntriesPage.tsx`
+* `BudgetTreePage.tsx`
 * `StockAlertsPage.tsx`
 * `RecommendationsPage.tsx`
 * `StockReportPage.tsx`
 * `DataIEPage.tsx`
+
+**shopping** (`my-tools-react/src/pages/shopping/`):
+* `ShoppingLayout.tsx`
+* `ProductsSearchPage.tsx`
+* `ProductDetailPage.tsx`
+* `BestOffersPage.tsx`
+* `ProductAlertsPage.tsx`
+* `ShopConfigPage.tsx`
+* `ProductConfigPage.tsx`
+* `ScrapAuditPage.tsx`
 
 **cook-book** (`my-tools-react/src/pages/cook-book/`):
 * `RecipeListPage.tsx`
@@ -845,3 +876,5 @@ test.describe('MyModule — integration', () => {
 * `e2e/integration/language-learning/language-learning.spec.ts` — Language Learning: EN word CRUD (create, edit, delete), validation (missing Text), tab navigation (Words → Flashcards → Quiz → Crossword), ES word CRUD, placeholder UI checks (Flashcards/Quiz/Crossword pages before data loaded)
 * `e2e/integration/ebook/ebook.spec.ts` — Ebook English Stats: tab navigation (Ebooks ↔ Not Learned Words), ebooks page structure (Add button, dialog, ebookName field, cancel), empty-name validation, mark-learned API (POST → 200), add-flashcard API (POST → 200), not-learned-words page structure (Refresh, Upload Known Words buttons)
 * `e2e/integration/canvas/canvas.spec.ts` — Canvas: sidebar visible (New Page button, search), empty state when no page selected, new page dialog (name + section fields, cancel, empty-name validation), full REST CRUD via API (create → 201, get detail, update content → 200, delete → 204, verify gone)
+* `e2e/integration/shopping/shopping.spec.ts` — Shopping Stats: navigation (products page, tabs, search bar), product search empty state, best-offers page structure, product alerts CRUD (create via API, verify in UI, delete), shop config CRUD (create via API, verify, delete), dialog fields, scrap audit date filter buttons, REST API checks (categories → 200, alerts/shops/configs/audits/best-offers → 200 with correct response shape)
+* `e2e/integration/invest-track/budget-tree.spec.ts` — Budget Tree: navigation (page loads, tab visible), empty state with future date range, auto-expand first month, expand-all/collapse-all interaction (via API-created entry), REST API structure check (array with key/label/totalPln/entryType/categories), entry appears in correct month
