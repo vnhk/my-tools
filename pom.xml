@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>common-vaadin</module>
+        <module>common</module>
         <module>pocket-app</module>
         <module>invest-track-app</module>
         <module>spreadsheet-app</module>
@@ -19,7 +19,7 @@
         <module>streaming-platform-react</module>
         <module>streaming-platform-app</module>
         <module>interview-app</module>
-        <module>my-tools-vaadin-app</module>
+        <module>my-tools-app</module>
         <module>english-text-stats-app</module>
         <module>file-storage-app</module>
         <module>learning-language-app</module>
