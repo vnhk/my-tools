@@ -27,7 +27,7 @@ Multi-module Maven project (`com.bervan:my-tools`) — a suite of personal produ
 ## Shared Architecture Patterns
 
 All modules follow the same conventions:
-- **Framework**: Spring Boot 3.0.4 + Java 17
+- **Framework**: Spring Boot 3.2.8 + Java 17
 - **Persistence**: Spring Data JPA, TABLE_PER_CLASS inheritance
 - **Entities**: Extend `BervanOwnedBaseEntity` (multi-tenancy), `deleted` flag (soft deletes)
 - **History**: `@HistorySupported` annotation + `Set<History*>` for audit trail
