@@ -45,28 +45,6 @@ COPY ./streaming-platform-app ./streaming-platform-app
 COPY ./learning-language-app ./learning-language-app
 COPY ./my-tools-app ./my-tools-app
 
-#themes manual copy to all required directions
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-app/src/main/resources/static/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-app/src/main/resources/static/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-app/src/main/resources/static/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/ocean-theme.css ./my-tools-app/src/main/resources/static/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/sunset-theme.css ./my-tools-app/src/main/resources/static/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/frost-theme.css ./my-tools-app/src/main/resources/static/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/blossom-theme.css ./my-tools-app/src/main/resources/static/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/intellij-theme.css ./my-tools-app/src/main/resources/static/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/bloodmoon-theme.css ./my-tools-app/src/main/resources/static/
-
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/cyberpunk-theme.css ./my-tools-app/src/main/frontend/themes/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/darkula-theme.css ./my-tools-app/src/main/frontend/themes/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/earth-theme.css ./my-tools-app/src/main/frontend/themes/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/ocean-theme.css ./my-tools-app/src/main/frontend/themes/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/sunset-theme.css ./my-tools-app/src/main/frontend/themes/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/frost-theme.css ./my-tools-app/src/main/frontend/themes/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/blossom-theme.css ./my-tools-app/src/main/frontend/themes/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/intellij-theme.css ./my-tools-app/src/main/frontend/themes/
-COPY ./my-tools-app/src/main/resources/META-INF/resources/static/bloodmoon-theme.css ./my-tools-app/src/main/frontend/themes/
-
-
 RUN mvn install -Pproduction -DskipTests
 
 FROM eclipse-temurin:17-jdk as RUNTIME
