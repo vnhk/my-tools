@@ -67,10 +67,26 @@ services:
       context: ../my-tools-react
       dockerfile: Dockerfile
     container_name: my-tools-react
-    ports:
-      - "80:80"
+    restart: unless-stopped
+    expose:
+      - 80
     depends_on:
       - my-tools-app
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: my-tools-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - my-tools-caddy-data:/data
+      - my-tools-caddy-config:/config
+    depends_on:
+      - my-tools-react
 
   mysql-cron-backup:
     image: fradelg/mysql-cron-backup
@@ -94,3 +110,5 @@ services:
 volumes:
   my-tools-db-data:
   my-tools-storage-data:
+  my-tools-caddy-data:
+  my-tools-caddy-config:
