@@ -1,5 +1,14 @@
+{
+    on_demand_tls {
+        interval 2m
+        burst    5
+    }
+}
+
 :443 {
-    tls internal
+    tls internal {
+        on_demand
+    }
     encode zstd gzip
     reverse_proxy my-tools-react:80
     request_body {
