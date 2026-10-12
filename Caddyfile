@@ -1,9 +1,3 @@
-{
-    on_demand_tls {
-        burst 5
-    }
-}
-
 :443 {
     tls internal {
         on_demand
