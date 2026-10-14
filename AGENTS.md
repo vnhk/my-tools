@@ -38,6 +38,7 @@ Agent coding rules
 - After adding or changing view fields, update or add `src/main/resources/autoconfig/<Entity>.yml` (fields: `name`, `displayName`, `type`, `required`, `inSaveForm`, `inEditForm`, `strValues`).
 - Use `BervanDTOMapper` for DTO ↔ model mapping; look for `@FieldMapperConfig`, `@PreCustomMappers`, `@PostCustomMappers` annotations.
 - File and Disk Storage: ALWAYS use `com.bervan.filestorage.service.FileServiceManager` (along with `FileDiskStorageService` and `FileDBStorageService`) for all file/directory persistence, metadata tracking, and disk operations across all backend modules, unless an operation is explicitly unsupported (e.g. temporary scratch files in `finally` blocks, or in-place tag updates via external libraries on physical files). See skill `.agents/skills/file-storage-manager/SKILL.md`.
+- Class Size & Refactoring: If any backend Java class exceeds 500 lines of functional/business logic (excluding fields, constructors, getters, setters, imports, and ceremony boilerplate), it MUST be refactored by decomposing responsibilities and extracting logic into dedicated collaborator services, components, or helper classes while preserving public API compatibility. See skill `.agents/skills/class-size-refactoring/SKILL.md`.
 
 Language
 - Always write code, comments and documentation in English. This repository uses English as the source language for all new code, Javadoc, inline comments and README/CLAUDE updates.
