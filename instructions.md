@@ -1,5 +1,11 @@
 # Instructions for AI model
 
+## Language Rule: English Only (MANDATORY)
+- **ALL code, class names, method names, variable names, and database column names MUST be in English.**
+- **ALL comments, Javadoc, documentation, and Git commit messages MUST be in English.**
+- **ALL user-facing / visible UI text on the frontend MUST be in English** (buttons, headers, modals, placeholders, toast notifications, error messages, empty states).
+- **Never put Polish or any other non-English language in code, comments, or UI text.**
+
 ## Development Guide
 
 ### Backend REST Controllers

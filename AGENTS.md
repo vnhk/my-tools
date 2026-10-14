@@ -41,8 +41,10 @@ Agent coding rules
 - File and Disk Storage: ALWAYS use `com.bervan.filestorage.service.FileServiceManager` (along with `FileDiskStorageService` and `FileDBStorageService`) for all file/directory persistence, metadata tracking, and disk operations across all backend modules, unless an operation is explicitly unsupported (e.g. temporary scratch files in `finally` blocks, or in-place tag updates via external libraries on physical files). See skill `.agents/skills/file-storage-manager/SKILL.md`.
 - Class Size & Refactoring: If any backend Java class exceeds 500 lines of functional/business logic (excluding fields, constructors, getters, setters, imports, and ceremony boilerplate), it MUST be refactored by decomposing responsibilities and extracting logic into dedicated collaborator services, components, or helper classes while preserving public API compatibility. See skill `.agents/skills/class-size-refactoring/SKILL.md`.
 
-Language
-- Always write code, comments and documentation in English. This repository uses English as the source language for all new code, Javadoc, inline comments and README/CLAUDE updates.
+Language & English-Only Rule (MANDATORY)
+- Always write all code, identifiers, comments, documentation, and Git commit messages in English.
+- On the frontend (React / TSX): all visible user-facing text (button labels, headers, dialogs, form placeholders, error/toast messages, table column headers, empty states) MUST be written in English. Never put Polish in code, comments, or UI.
+- This repository uses English strictly across both backend and frontend.
 
 Example: Adding a new entity — suggested flow
 1. Create the JPA entity class under the appropriate module (e.g. `pocket-app/src/main/java/.../MyEntity.java`). Prefer extending `BervanOwnedBaseEntity<UUID>` when the entity is owned.
