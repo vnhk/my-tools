@@ -223,6 +223,9 @@ Path: ~/IdeaProjects/my-tools-react
 - Structure should be modular and consistent.
 - Update the structure as needed.
 
+#### Component Size & Modularization Rule
+**MANDATORY**: Any React component or file (`.tsx` or `.ts`) that reaches or exceeds **1000 lines** MUST be refactored by decomposing and extracting child views, modals, tabs, complex item rows, toolbars, and custom hooks into separate files under a co-located `components/` or `hooks/` directory and importing them back. No monolithic files over 1000 lines.
+
 #### Visual Consistency Rule
 **MANDATORY**: All modules (except `streaming-platform`) must look identical — same buttons, inputs, dropdowns, badges, cards. Never invent one-off styled elements; always use the shared components below.
 

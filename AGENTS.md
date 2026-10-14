@@ -17,6 +17,7 @@ Frontend and autoconfig (from `instructions.md`)
 - React MUST build table columns with `buildColumnsFromConfig<T>('EntityName', overrides)` and use `<DynamicForm entityName="EntityName" mode="save|edit" .../>` for create/edit forms.
 - Use provided UI components: `Dialog` for modals and `InlineEditableField` for inline edits — look under `my-tools-react/src/components/ui/`.
 - CSS rule: all colors and design tokens must reference `src/styles/variables.css` — do NOT hardcode color literals in CSS modules.
+- React Component Size & Refactoring: If any React component or frontend file (`.tsx` or `.ts`) reaches or exceeds 1000 lines, it MUST be refactored by decomposing and extracting subcomponents (modals, tab views, cards, item rows, toolbars) and custom hooks into separate files under a co-located `components/` or `hooks/` directory and importing them back. See skill `.agents/skills/react-component-size-refactoring/SKILL.md`.
 
 Integration E2E (Playwright + Spring Boot)
 - Run from `my-tools-react/`:
