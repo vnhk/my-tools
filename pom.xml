@@ -24,6 +24,7 @@
         <module>learning-language-app</module>
         <module>shopping-stats-server-app</module>
         <module>cook-book</module>
+        <module>photo-library-app</module>
     </modules>
 
 </project>
