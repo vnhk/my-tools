@@ -24,6 +24,7 @@ COPY pocket-app/pom.xml pocket-app/
 COPY project-mgmt-app/pom.xml project-mgmt-app/
 COPY streaming-platform-app/pom.xml streaming-platform-app/
 COPY learning-language-app/pom.xml learning-language-app/
+COPY photo-library-app/pom.xml photo-library-app/
 COPY my-tools-app/pom.xml my-tools-app/
 
 RUN mvn dependency:go-offline -B
@@ -41,6 +42,7 @@ COPY ./pocket-app ./pocket-app
 COPY ./project-mgmt-app ./project-mgmt-app
 COPY ./streaming-platform-app ./streaming-platform-app
 COPY ./learning-language-app ./learning-language-app
+COPY ./photo-library-app ./photo-library-app
 COPY ./my-tools-app ./my-tools-app
 
 RUN mvn install -Pproduction -DskipTests
