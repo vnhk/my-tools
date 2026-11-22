@@ -62,3 +62,5 @@ Each module has its own `CLAUDE.md` with detailed architecture notes:
 4. External scraper modules in `profile-stealth/` (shopping-stats scraper)
 
 File storage supports injected module-specific metadata tracking policies. Streaming Platform supplies the HLS segment rule; file-storage itself has no dependency on streaming configuration. Excluded files remain on disk and participate in folder ZIP exports, while synchronization only removes their metadata records.
+
+Browser diagnostics use the existing RabbitMQ log pipeline through the authenticated common-module `/api/client-logs` endpoint. Media playback reports bounded, redacted diagnostics so TV issues can be investigated from the Logs module.
