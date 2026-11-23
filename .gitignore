@@ -65,3 +65,5 @@ env_my_tools
 /movies/
 /my-tools-app/profile-stealth/
 /.kilo/
+
+.env
