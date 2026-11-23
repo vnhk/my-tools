@@ -75,6 +75,7 @@ the MCP process. Automatic login and token refresh are not implemented.
 | --- | --- |
 | `list_projects` | `GET /api/project-management/projects` |
 | `get_project` | `GET /api/project-management/projects/{projectId}` |
+| `create_project` | `POST /api/project-management/projects` |
 | `list_tasks` | `GET /api/project-management/tasks` |
 | `search_tasks` | `GET /api/project-management/tasks/search?projectId=...&q=...` |
 | `get_task` | `GET /api/project-management/tasks/{taskId}` |
@@ -120,12 +121,14 @@ List operations accept zero-based `page` and `size` (1–100). `list_tasks` acce
 an optional project UUID. Search matches task name or number within one project,
 with a backend limit of 50 results. Use UUIDs returned by list/search tools.
 
-Creation requires `projectId` and `name`; defaults are `Open`, `Task`, and `Medium`.
+Project creation requires `name` and `number` (the project code); defaults are
+`Open` and `Medium`. Check existing project codes before creating.
+Task creation requires `projectId` and `name`; defaults are `Open`, `Task`, and `Medium`.
 Updates accept a `taskId` and a non-empty `changes` object. Optional fields include
 description, assignee, priority, type, tags (a string), estimatedHours and dueDate.
 Dates use backend local date-time without timezone, e.g. `2026-11-23T14:30:00`.
 Explicit null clearing is unavailable because the backend PATCH ignores nulls.
-Task moving, deletion, project modification and relationship writes are not exposed.
+Task moving, deletion, project updates and relationship writes are not exposed.
 
 ## Example workflow
 

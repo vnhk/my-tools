@@ -5,7 +5,7 @@
 - At the start of a session, check whether the configured `my-tools` MCP server's tools are available. Its server identity is `my-tools-project-management`; clients may prefix tool names.
 - If the tools are missing, notify the user once that MCP is not connected to this session. A server folder or a separately running `npm start` process does not establish a client connection.
 - When the tools are available, verify backend access with a small read-only request, such as `list_projects` with `page: 0, size: 1`, before relying on live data. Tool discovery alone does not prove that the backend is reachable.
-- Use MCP for live project and task operations: `list_projects`, `get_project`, `list_tasks`, `search_tasks`, `get_task`, `create_task`, `update_task`, and `set_task_status`.
+- Use MCP for live project and task operations: `list_projects`, `get_project`, `create_project`, `list_tasks`, `search_tasks`, `get_task`, `create_task`, `update_task`, and `set_task_status`.
 - Use `list_logs`, `get_log_filter_values`, and `list_log_trackers` for application diagnostics. Start with relevant application, time, level, and text filters and bounded pages; widen the search when needed.
 - If a request fails, immediately tell the user which operation failed and the sanitized reason, distinguishing missing tools, connection failures, expired authentication, and denied access when the returned error permits it. Never claim that a read or write succeeded without a successful tool response.
 - Continue independent repository work when MCP is unavailable, but explicitly identify any task updates or log checks that could not be performed. Do not silently substitute direct REST/database access or ask the user to paste a token into chat.

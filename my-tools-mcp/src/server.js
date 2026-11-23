@@ -45,6 +45,14 @@ export function createServer(api) {
     pagination, true, (query) => api('projects', { query }));
   tool('get_project', 'Get an accessible project by UUID.', { projectId: id }, true,
     ({ projectId }) => api(`projects/${projectId}`));
+  tool('create_project', 'Create a project with a stable project code (number). Check existing projects for duplicate codes before creating. Do not automatically retry after a timeout.',
+    {
+      name: z.string().min(4).max(200),
+      number: z.string().min(2).max(20).describe('Project code used as the task number prefix, for example JNKS.'),
+      status: status.default('Open'),
+      priority: taskFields.priority.default('Medium'),
+      description: taskFields.description.optional(),
+    }, false, (body) => api('projects', { method: 'POST', body }));
   tool('list_tasks', 'List accessible tasks, optionally restricted to a project. Results are paginated.',
     { ...pagination, projectId: id.optional() }, true, (query) => api('tasks', { query }));
   tool('search_tasks', 'Search task names or task numbers within a project. Backend returns at most 50 results.',

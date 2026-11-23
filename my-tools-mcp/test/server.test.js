@@ -17,7 +17,7 @@ test('MCP discovers tools, validates input and maps create/status operations', a
   await server.connect(serverTransport);
   await client.connect(clientTransport);
   try {
-    assert.equal((await client.listTools()).tools.length, 11);
+    assert.equal((await client.listTools()).tools.length, 12);
     const taskId = 'ae6ade44-e2fe-4e55-bdb3-3a442d01f654';
     const created = await client.callTool({ name: 'create_task', arguments: { projectId: taskId, name: 'Test task' } });
     assert.equal(created.isError, undefined);
@@ -71,8 +71,34 @@ test('starts over stdio and advertises tools without contacting the backend', as
     await client.connect(transport);
     const { tools } = await client.listTools();
     assert.ok(tools.some((tool) => tool.name === 'create_task'));
+    assert.ok(tools.some((tool) => tool.name === 'create_project'));
     assert.ok(tools.some((tool) => tool.name === 'set_task_status'));
   } finally {
     await client.close();
+  }
+});
+
+test('creates projects through MCP with validated codes and backend-compatible defaults', async () => {
+  const calls = [];
+  const server = createServer(async (path, options) => {
+    calls.push({ path, options });
+    return { id: 'project-id', ...options.body };
+  });
+  const client = new Client({ name: 'project-test', version: '1.0.0' });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  await server.connect(serverTransport);
+  await client.connect(clientTransport);
+  try {
+    const invalid = await client.callTool({ name: 'create_project', arguments: { name: 'Test project' } });
+    assert.equal(invalid.isError, true);
+    assert.equal(calls.length, 0);
+    const created = await client.callTool({ name: 'create_project', arguments: { name: 'Test project', number: 'TEST' } });
+    assert.equal(created.isError, undefined);
+    assert.deepEqual(calls, [{ path: 'projects', options: { method: 'POST', body: {
+      name: 'Test project', number: 'TEST', status: 'Open', priority: 'Medium',
+    } } }]);
+  } finally {
+    await client.close();
+    await server.close();
   }
 });
