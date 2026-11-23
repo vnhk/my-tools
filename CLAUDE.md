@@ -49,6 +49,7 @@ cd <module> && mvn clean install -DskipTests
 ## Individual Module Notes
 `my-tools-mcp/` is a standalone Node.js stdio MCP adapter for the Project Management
 REST API. It uses `MY_TOOLS_API_URL` and an existing user JWT in `MY_TOOLS_TOKEN`.
+The MCP process loads these values from `my-tools-mcp/.env` independently of the client's working directory; credentials are not needed in client configuration.
 It also provides read-only log queries, filter-value discovery and tracker queries through `/api/logs`.
 It is not a Maven module and does not add backend authentication or task execution.
 See `my-tools-mcp/README.md` for setup, tools and limitations.

@@ -11,22 +11,32 @@ Requires Node.js 20 or newer (prefer a currently supported Node.js LTS).
 ```sh
 cd my-tools-mcp
 npm install
+cp .env.example .env
 npm test
 ```
 
 Start the My Tools backend separately. Obtain a JWT using the application's
-normal login flow (including OTP when enabled). Set these variables in the MCP
-client's process environment:
+normal login flow (including OTP when enabled). Set these values in
+`my-tools-mcp/.env`:
 
 - `MY_TOOLS_API_URL`: backend origin, for example `http://localhost:8080`.
   Do not append `/api`. An optional deployment path prefix is supported.
 - `MY_TOOLS_TOKEN`: the raw login JWT, without the `Bearer ` prefix.
 
-`.env.example` documents the variables; `.env` files are **not automatically loaded**.
+MCP automatically reads `.env` from its own directory, regardless of the client's
+working directory. Values in this file override inherited environment variables.
+If the file is absent, inherited environment variables remain a fallback.
 Use HTTPS for a backend outside localhost. Redirects are rejected to avoid forwarding
 credentials elsewhere. Keep normal TLS certificate validation enabled.
 
 ## Client configuration
+
+For Codex, copy the table in `codex-config.toml.example` into the project's
+`.codex/config.toml` (merge it if the file already exists). Adjust the absolute
+script path for other checkouts. No `env` or `env_vars` entries are needed: MCP
+loads its own `.env` file. Reload the MCP
+connection or restart the client after configuration changes. The project must
+be trusted for project-scoped configuration to apply.
 
 For MCP clients accepting an `mcpServers` configuration, adapt this example using
 the absolute path to your checkout and your installed Node.js executable:
@@ -36,18 +46,14 @@ the absolute path to your checkout and your installed Node.js executable:
   "mcpServers": {
     "my-tools": {
       "command": "node",
-      "args": ["/absolute/path/to/my-tools/my-tools-mcp/src/index.js"],
-      "env": {
-        "MY_TOOLS_API_URL": "http://localhost:8080",
-        "MY_TOOLS_TOKEN": "YOUR_LOGIN_JWT"
-      }
+      "args": ["/absolute/path/to/my-tools/my-tools-mcp/src/index.js"]
     }
   }
 }
 ```
 
 The exact configuration location and format depend on the client. Store real
-credentials in private client configuration outside version control. Do not put
+credentials in `my-tools-mcp/.env`, which is ignored by Git. Do not put
 them in prompts. This process does not return its configuration to the model.
 An AI client with separate terminal access may still be able to read local secrets.
 The JWT grants the same backend access as the logged-in user; this adapter does
