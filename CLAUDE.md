@@ -47,6 +47,12 @@ cd <module> && mvn clean install -DskipTests
 ```
 
 ## Individual Module Notes
+`my-tools-mcp/` is a standalone Node.js stdio MCP adapter for the Project Management
+REST API. It uses `MY_TOOLS_API_URL` and an existing user JWT in `MY_TOOLS_TOKEN`.
+It also provides read-only log queries, filter-value discovery and tracker queries through `/api/logs`.
+It is not a Maven module and does not add backend authentication or task execution.
+See `my-tools-mcp/README.md` for setup, tools and limitations.
+
 Each module has its own `CLAUDE.md` with detailed architecture notes:
 - See `canvas-app/CLAUDE.md`, `cook-book/CLAUDE.md`, `english-text-stats-app/CLAUDE.md`
 - See `file-storage-app/CLAUDE.md`, `interview-app/CLAUDE.md`, `pocket-app/CLAUDE.md`
