@@ -1,5 +1,7 @@
 # Instructions for AI model
 
+Follow [MCP usage and availability](AGENTS.md#mcp-usage-and-availability) in `AGENTS.md` for live project tasks and application logs, including notifying the user when MCP tools or backend access are unavailable.
+
 ## Language Rule: English Only (MANDATORY)
 - **ALL code, class names, method names, variable names, and database column names MUST be in English.**
 - **ALL comments, Javadoc, documentation, and Git commit messages MUST be in English.**

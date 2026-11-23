@@ -2,6 +2,8 @@
 
 > **IMPORTANT**: Keep this file updated when making significant changes to the codebase. This file serves as persistent memory between Claude Code sessions.
 
+Read and follow [MCP usage and availability](AGENTS.md#mcp-usage-and-availability) in `AGENTS.md` at session start. It defines required MCP use for live tasks and logs, connectivity checks, and user notification when MCP is unavailable.
+
 ## Overview
 Multi-module Maven project (`com.bervan:my-tools`) — a suite of personal productivity and lifestyle applications built on Spring Boot (REST API). Frontend is React (`my-tools-react`). All modules share common infrastructure from `common` and `core` libraries.
 
