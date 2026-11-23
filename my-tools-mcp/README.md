@@ -32,27 +32,31 @@ credentials elsewhere. Keep normal TLS certificate validation enabled.
 ## Client configuration
 
 For Codex, copy the table in `codex-config.toml.example` into the project's
-`.codex/config.toml` (merge it if the file already exists). Adjust the absolute
-script path for other checkouts. No `env` or `env_vars` entries are needed: MCP
+`.codex/config.toml` (merge it if the file already exists). Open the repository
+root as the client's working directory: the script path is relative to that
+directory and does not depend on where the repository is cloned.
+No `env` or `env_vars` entries are needed: MCP
 loads its own `.env` file. Reload the MCP
 connection or restart the client after configuration changes. The project must
 be trusted for project-scoped configuration to apply.
 
-For MCP clients accepting an `mcpServers` configuration, adapt this example using
-the absolute path to your checkout and your installed Node.js executable:
+For MCP clients accepting an `mcpServers` configuration and launching processes
+from the repository root, use:
 
 ```json
 {
   "mcpServers": {
     "my-tools": {
       "command": "node",
-      "args": ["/absolute/path/to/my-tools/my-tools-mcp/src/index.js"]
+      "args": ["my-tools-mcp/src/index.js"]
     }
   }
 }
 ```
 
-The exact configuration location and format depend on the client. Store real
+If a client starts processes from another directory, configure its working
+directory to the repository root. The exact configuration location and format
+depend on the client. Store real
 credentials in `my-tools-mcp/.env`, which is ignored by Git. Do not put
 them in prompts. This process does not return its configuration to the model.
 An AI client with separate terminal access may still be able to read local secrets.

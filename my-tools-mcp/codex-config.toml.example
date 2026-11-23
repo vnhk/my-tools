@@ -1,5 +1,6 @@
 # Copy this table into the project's .codex/config.toml.
 # MCP reads credentials directly from my-tools-mcp/.env.
+# Open the repository root as the client's working directory.
 [mcp_servers.my-tools]
 command = "node"
-args = ["/Users/zbyszek/IdeaProjects/my-tools/my-tools-mcp/src/index.js"]
+args = ["my-tools-mcp/src/index.js"]

@@ -1,0 +1,5 @@
+# Copy this table into the project's .codex/config.toml.
+# MCP reads credentials directly from my-tools-mcp/.env.
+[mcp_servers.my-tools]
+command = "node"
+args = ["my-tools-mcp/src/index.js"]
