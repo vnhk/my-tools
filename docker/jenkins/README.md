@@ -53,6 +53,8 @@ depend on the build cache. Schedule and test upgrades deliberately.
 From any directory, using the correct path to this checkout:
 
 ```sh
+cp docker/jenkins/jenkins.config.example docker/jenkins/jenkins.local.conf
+# Edit jenkins.local.conf and set JENKINS_BIND_ADDRESS to the server's LAN IP.
 bash docker/jenkins/jenkins.sh start
 bash docker/jenkins/jenkins.sh status
 ```
@@ -62,13 +64,24 @@ are under `.local/` next to this README, excluded from Git. Existing files are
 never overwritten. Neither application nor MCP `.env` files are read by the wrapper.
 An optional exported `JENKINS_LOCAL_DIR` can select another absolute secret directory.
 
-For access from your computer, forward the loopback-only port:
+Open the URL printed by `start` from your LAN; no SSH tunnel is required.
+The port binds specifically to the configured server LAN address, not every
+host interface. Authentication remains required. This endpoint uses HTTP, so
+credentials and sessions are not protected by TLS; use only a trusted LAN and
+do not forward port 8092 from the Internet. HTTPS can be added separately.
 
-```sh
-ssh -N -L 8092:127.0.0.1:8092 USER@PRODUCTION_HOST
-```
+Network configuration is local and ignored by Git. The wrapper sources the
+operator-owned `jenkins.local.conf` as trusted Bash configuration. Alternatively,
+export the settings before running the wrapper (file values override exports).
+`JENKINS_BIND_ADDRESS` is required for `start` and `validate` and must exist on the
+server. `JENKINS_PORT` defaults to 8092. `JENKINS_PUBLIC_URL` is automatically
+derived from these values, or can be overridden for a DNS name or HTTPS proxy.
+When binding to a wildcard address, provide a concrete public URL explicitly.
+To restore SSH-only access, bind to `127.0.0.1` and forward the configured port
+over SSH. `stop`, `status` and `logs` remain usable even without local network
+configuration; they do not change the running containers' port bindings.
 
-Open `http://localhost:8092`. Username: `admin`. Read the generated password
+Username: `admin`. Read the generated password
 locally from `docker/jenkins/.local/admin-password`; do not paste it into chat,
 commits or pipeline definitions. This bootstrap credential remains configured by
 `jenkins.yaml` on each start. Password rotation must update its secret source too.

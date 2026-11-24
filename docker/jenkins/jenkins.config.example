@@ -1,0 +1,6 @@
+# Copy to jenkins.local.conf and set the production server's LAN interface IP.
+# This is trusted Bash configuration. It contains no application credentials.
+JENKINS_BIND_ADDRESS=
+JENKINS_PORT=8092
+# Optional override for a reverse proxy or DNS name. Otherwise derived above.
+# JENKINS_PUBLIC_URL=https://jenkins.example.com/

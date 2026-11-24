@@ -11,10 +11,11 @@ services:
     memswap_limit: 1g
     cpus: 1.0
     ports:
-      - "127.0.0.1:8092:8080"
+      - "${JENKINS_BIND_ADDRESS:?Set JENKINS_BIND_ADDRESS}:${JENKINS_PORT:-8092}:8080"
     environment:
       JAVA_OPTS: "-Xms128m -Xmx512m -Djenkins.install.runSetupWizard=false"
       CASC_JENKINS_CONFIG: /etc/jenkins/jenkins.yaml
+      JENKINS_PUBLIC_URL: "${JENKINS_PUBLIC_URL:?Use jenkins.sh or set JENKINS_PUBLIC_URL}"
     secrets:
       - admin_password
     volumes:

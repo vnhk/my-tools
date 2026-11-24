@@ -27,6 +27,9 @@ class LifecycleTests(unittest.TestCase):
             **os.environ,
             "PATH": f"{self.root}{os.pathsep}{os.environ['PATH']}",
             "JENKINS_LOCAL_DIR": str(self.secrets),
+            "JENKINS_BIND_ADDRESS": "192.0.2.10",
+            "JENKINS_PORT": "18092",
+            "JENKINS_PUBLIC_URL": "",
             "DOCKER_CALLS": str(self.calls),
             "COMPOSE_FILE": "/should-not-use-production.yml",
             "COMPOSE_PROJECT_NAME": "production-must-not-be-touched",
@@ -56,6 +59,7 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual(self.secrets.stat().st_mode & 0o777, 0o700)
         password = (self.secrets / "admin-password").read_text().strip()
         self.assertNotIn(password, result.stdout + result.stderr)
+        self.assertIn("http://192.0.2.10:18092/", result.stdout)
 
     def test_configured_start_preserves_secrets_and_starts_build_profile(self):
         self.secrets.mkdir()
@@ -79,6 +83,23 @@ class LifecycleTests(unittest.TestCase):
         result = subprocess.run(["bash", str(SCRIPT), "down", "-v"], env=self.env, capture_output=True)
         self.assertEqual(result.returncode, 2)
         self.assertFalse(self.calls.exists())
+
+    def test_start_requires_an_explicit_bind_address_before_creating_secrets(self):
+        self.env.pop("JENKINS_BIND_ADDRESS")
+        result = subprocess.run(["bash", str(SCRIPT), "start"], env=self.env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("Set JENKINS_BIND_ADDRESS", result.stderr)
+        self.assertFalse(self.calls.exists())
+        self.assertFalse(self.secrets.exists())
+
+    def test_stop_still_works_without_network_configuration(self):
+        self.env.pop("JENKINS_BIND_ADDRESS")
+        self.run_command("stop")
+
+    def test_explicit_public_url_overrides_derived_address(self):
+        self.env["JENKINS_PUBLIC_URL"] = "https://ci.example.com/"
+        result, _ = self.run_command("start")
+        self.assertIn("https://ci.example.com/", result.stdout)
 
 
 if __name__ == "__main__":

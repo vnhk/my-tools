@@ -2,7 +2,24 @@
 set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$script_dir/jenkins.local.conf" ]]; then
+  # Dedicated, operator-owned shell configuration; never load application .env.
+  set -a
+  source "$script_dir/jenkins.local.conf"
+  set +a
+fi
 export JENKINS_LOCAL_DIR="${JENKINS_LOCAL_DIR:-$script_dir/.local}"
+export JENKINS_PORT="${JENKINS_PORT:-8092}"
+if [[ "${1:-}" == start || "${1:-}" == validate ]]; then
+  if [[ -z "${JENKINS_BIND_ADDRESS:-}" ]]; then
+    echo "Set JENKINS_BIND_ADDRESS in jenkins.local.conf or export it before starting Jenkins." >&2
+    exit 2
+  fi
+fi
+# For read/stop commands only, these placeholders let Compose render without a
+# network configuration. They never create or update a container.
+export JENKINS_BIND_ADDRESS="${JENKINS_BIND_ADDRESS:-127.0.0.1}"
+export JENKINS_PUBLIC_URL="${JENKINS_PUBLIC_URL:-http://${JENKINS_BIND_ADDRESS}:${JENKINS_PORT}/}"
 
 compose() {
   # Do not load the repository's .env or production Compose configuration.
@@ -31,7 +48,7 @@ case "${1:-}" in
       compose up --build --detach jenkins
       echo "Controller started. Configure the agent secret using README.md, then run start again."
     fi
-    echo "Jenkins: http://localhost:8092 (SSH forwarding required from another computer)."
+    echo "Jenkins: $JENKINS_PUBLIC_URL"
     echo "Admin password is in $JENKINS_LOCAL_DIR/admin-password; it is not printed automatically."
     ;;
   stop)

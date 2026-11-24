@@ -21,4 +21,4 @@ jenkins:
           inbound: {}
 unclassified:
   location:
-    url: http://localhost:8092/
+    url: "${JENKINS_PUBLIC_URL}"
