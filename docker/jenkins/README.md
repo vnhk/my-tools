@@ -33,7 +33,12 @@ containers before relying on the CI daemon's limit as an aggregate build limit.
 Docker-in-Docker requires a privileged container. This avoids sharing production
 Docker control, but is not a security boundary against malicious pipelines:
 restrict Jenkins to trusted administrators and trusted code. Stop the stack
-when not in use. None of the services restart automatically after host reboot.
+when not in use. The controller uses `on-failure:3` so Jenkins' UI restart can
+bring it back after plugin installation (up to three restart attempts). Explicit
+`jenkins.sh stop` still leaves it stopped; `on-failure` does not start it when the
+Docker daemon restarts. The CI daemon and agent retain restart policy `no`.
+The official controller image already includes Tini; do not add Compose `init`
+to that service. The inbound agent retains `init: true` for subprocess handling.
 
 ## Requirements
 
@@ -120,6 +125,12 @@ by the lifecycle script.
 
 Use `logs agent`, `logs docker`, `logs jenkins` and `status` for diagnosis. Logs
 can include sensitive plugin/job diagnostics; inspect them locally before sharing.
+
+If a UI restart stops an older controller configured with `restart: "no"`, run
+`jenkins.sh start` after updating this Compose file. It recreates only the CI
+controller when needed, preserving Jenkins home and installed plugins; production
+containers are not involved. Readiness is confirmed by the log message
+`Jenkins is fully up and running`, not by the browser's restart waiting screen.
 
 ## Persistence, backups and next steps
 

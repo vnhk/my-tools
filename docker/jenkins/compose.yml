@@ -5,8 +5,9 @@ services:
       context: .
       dockerfile: controller.Dockerfile
     image: my-tools-jenkins-controller:local
-    restart: "no"
-    init: true
+    # Jenkins exits nonzero for a UI restart; Docker must start it again.
+    # Explicit docker compose stop still keeps this on-demand service stopped.
+    restart: "on-failure:3"
     mem_limit: 1g
     memswap_limit: 1g
     cpus: 1.0
