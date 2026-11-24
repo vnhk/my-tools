@@ -1,0 +1,24 @@
+jenkins:
+  systemMessage: "On-demand My Tools CI. Production deployments are not configured."
+  numExecutors: 0
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          password: "${admin_password}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  nodes:
+    - permanent:
+        name: my-tools-builder
+        labelString: my-tools-builder
+        remoteFS: /home/jenkins/agent
+        numExecutors: 1
+        mode: EXCLUSIVE
+        launcher:
+          inbound: {}
+unclassified:
+  location:
+    url: http://localhost:8092/

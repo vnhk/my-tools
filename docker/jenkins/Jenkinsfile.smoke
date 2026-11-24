@@ -1,0 +1,24 @@
+pipeline {
+    agent { label 'my-tools-builder' }
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        timeout(time: 10, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timestamps()
+    }
+    stages {
+        stage('Verify isolated Docker access') {
+            steps {
+                sh '''
+                    set -eu
+                    test "$DOCKER_HOST" = "tcp://docker:2376"
+                    docker version
+                    docker info --format 'CI Docker server: {{.Name}}'
+                    docker buildx version
+                    docker compose version
+                '''
+            }
+        }
+    }
+}

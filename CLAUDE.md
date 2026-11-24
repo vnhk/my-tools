@@ -49,6 +49,12 @@ cd <module> && mvn clean install -DskipTests
 ```
 
 ## Individual Module Notes
+`docker/jenkins/` provides a separate on-demand Jenkins controller, single agent
+and CI-only Docker daemon. Its lifecycle wrapper never loads production Compose
+or application/MCP `.env` files and only stops CI services. It currently provides
+installation and a smoke job; application builds and production deployment remain
+separate work. See `docker/jenkins/README.md` before running it on the server.
+
 `my-tools-mcp/` is a standalone Node.js stdio MCP adapter for the Project Management
 REST API. It uses `MY_TOOLS_API_URL` and an existing user JWT in `MY_TOOLS_TOKEN`.
 The MCP process loads these values from `my-tools-mcp/.env` independently of the client's working directory; credentials are not needed in client configuration.
