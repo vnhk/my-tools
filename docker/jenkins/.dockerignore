@@ -1,0 +1,5 @@
+.local
+jenkins.local.conf
+**/.env*
+**/__pycache__
+tests

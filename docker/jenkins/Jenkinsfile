@@ -1,0 +1,58 @@
+pipeline {
+    agent { label 'my-tools-builder' }
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        timeout(time: 180, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '3'))
+        timestamps()
+    }
+    parameters {
+        booleanParam(name: 'RUN_INTEGRATION_TESTS', defaultValue: true,
+            description: 'Run React integration tests against temporary CI databases/services.')
+        booleanParam(name: 'EXPORT_IMAGES', defaultValue: true,
+            description: 'Archive the built images for a later, separate production release.')
+    }
+    stages {
+        stage('Checkout main repository') {
+            steps {
+                dir('sources') { deleteDir() }
+                dir('release') { deleteDir() }
+                dir('sources/my-tools') { checkout scm }
+            }
+        }
+        stage('Checkout modules and record commits') {
+            steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py checkout' }
+        }
+        stage('Prepare CI tool image') {
+            steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py tools' }
+        }
+        stage('Build and test Java backend') {
+            steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py backend' }
+        }
+        stage('Build and type-check React frontend') {
+            steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py frontend' }
+        }
+        stage('Integration tests') {
+            when { expression { params.RUN_INTEGRATION_TESTS } }
+            steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py integration' }
+        }
+        stage('Package versioned application images') {
+            steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py images' }
+        }
+        stage('Export release images') {
+            when { expression { params.EXPORT_IMAGES } }
+            steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py export' }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'release/*.json,release/*.sha256,sources/**/target/surefire-reports/*.xml',
+                allowEmptyArchive: true
+        }
+        success {
+            archiveArtifacts artifacts: 'release/*.tar.gz', allowEmptyArchive: true
+            echo 'Build completed in CI only. Production containers and production secrets were not accessed.'
+        }
+    }
+}

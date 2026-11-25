@@ -1,0 +1,87 @@
+[
+  {
+    "path": "my-tools/common",
+    "url": "https://github.com/vnhk/common.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/pocket-app",
+    "url": "https://github.com/vnhk/pocket-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/invest-track-app",
+    "url": "https://github.com/vnhk/invest-track-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/spreadsheet-app",
+    "url": "https://github.com/vnhk/spreadsheet-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/project-mgmt-app",
+    "url": "https://github.com/vnhk/project-mgmt-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/canvas-app",
+    "url": "https://github.com/vnhk/canvas-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/streaming-platform-app",
+    "url": "https://github.com/vnhk/streaming-platform-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/interview-app",
+    "url": "https://github.com/vnhk/interview-base.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/my-tools-app",
+    "url": "https://github.com/vnhk/my-tools-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/english-text-stats-app",
+    "url": "https://github.com/vnhk/english-text-stats-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/file-storage-app",
+    "url": "https://github.com/vnhk/file-storage-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/learning-language-app",
+    "url": "https://github.com/vnhk/learning-language-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/shopping-stats-server-app",
+    "url": "https://github.com/vnhk/shopping-stats-server.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/cook-book",
+    "url": "https://github.com/vnhk/cook-book.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools/photo-library-app",
+    "url": "https://github.com/vnhk/photo-library-app.git",
+    "revision": "main"
+  },
+  {
+    "path": "bervan-utils",
+    "url": "https://github.com/vnhk/bervan-utils.git",
+    "revision": "main"
+  },
+  {
+    "path": "my-tools-react",
+    "url": "https://github.com/vnhk/my-tools-react.git",
+    "revision": "main"
+  }
+]

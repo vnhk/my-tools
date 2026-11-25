@@ -2,8 +2,9 @@
 
 This is the installation/bootstrap stage of JNKS. It does not deploy My Tools or
 run `linux-build-script.sh`. Existing production containers, configuration and
-volumes are not used by this stack. The application build/release pipeline is
-the next stage, after the smoke job and repository/commit manifest are verified.
+volumes are not used by this stack. A full build/test/image-export pipeline is
+available in `Jenkinsfile`; see [PIPELINE.md](PIPELINE.md) for setup and a detailed
+stage-by-stage explanation. Production deployment is not configured.
 
 ## Isolation and resources
 
@@ -146,9 +147,8 @@ Back up Jenkins home and the generated admin credential while CI is stopped,
 encrypt backups and verify a restore into an isolated instance. Never run global
 `docker system prune --volumes` or Compose `down -v` as a CI cleanup step on this host.
 
-Next: confirm all repository locations and access, select exact commit revisions,
-implement clean disposable checkouts, build `bervan-utils`, backend and frontend
-sequentially, add tests, and retain uniquely versioned release artifacts. Before
+Next: run the full build pipeline described in [PIPELINE.md](PIPELINE.md), confirm
+repository access, and validate tests and exported release artifacts on Linux. Before
 adding deployment, inventory production bind mounts, named volumes and any data
 in container writable layers. Do not replace a production container until that
 data and recovery path have been verified with the owner.
