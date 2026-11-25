@@ -116,7 +116,10 @@ It stays on the production host at its existing location. This pipeline does not
 open it, mount it, copy it, source it, archive it or pass it to any build command.
 The same applies to MCP `.env`, Jenkins `.local/` secrets and production data.
 Tracked runtime environment filenames fail the checkout checks without reading
-their contents. Packaging contexts contain only the built JAR plus the existing
+their contents. The exact root path `.env_my_tools_default` is allowed only in
+the main source checkout for compatibility with the existing repository; its
+contents are not inspected and the exception does not apply to image packaging.
+Packaging contexts contain only the built JAR plus the existing
 version-controlled application `configuration/`, or frontend `dist` and `nginx.conf`.
 Keep runtime secrets out of those version-controlled files too.
 

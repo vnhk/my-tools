@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import tempfile
 import sys
+import subprocess
 import unittest
 from unittest.mock import Mock, patch
 import xml.etree.ElementTree as ET
@@ -50,6 +51,20 @@ class PipelineTests(unittest.TestCase):
             with self.subTest(path=path), self.assertRaises(ValueError):
                 ci.reject_secret_names([path])
         ci.reject_secret_names([".env.example", "module/.env.local.example", "configuration/app.properties"])
+
+    def test_root_default_exception_applies_only_to_main_source_checkout(self):
+        ci.reject_secret_names([".env_my_tools_default"], allow_root_default=True)
+        with self.assertRaisesRegex(ValueError, r"\.env_my_tools_default"):
+            ci.reject_secret_names([".env_my_tools_default"])
+        for name in [".env_my_tools", "module/.env_my_tools_default", ".env_my_tools_default/secret"]:
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                ci.reject_secret_names([name], allow_root_default=True)
+
+    def test_main_repository_tracked_filenames_pass_checkout_guard(self):
+        # Inspect filenames only; never open environment file contents.
+        paths = subprocess.check_output(["git", "ls-files", "-z"],
+                                        cwd=DIRECTORY.parents[1], text=True).split("\0")
+        ci.reject_secret_names([p for p in paths if p], allow_root_default=True)
 
     def test_cannot_run_from_local_production_checkout_or_production_docker(self):
         with patch.dict(os.environ, {"WORKSPACE": "/not-a-jenkins-workspace"}):

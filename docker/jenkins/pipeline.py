@@ -35,12 +35,16 @@ def validate_repository(entry):
         raise ValueError("Invalid repository revision")
 
 
-def reject_secret_names(paths):
+def reject_secret_names(paths, allow_root_default=False):
     for path in paths:
+        # The existing root default file may be tracked in source, but must
+        # never be accepted in a runtime image packaging context.
+        if allow_root_default and Path(path).as_posix() == ".env_my_tools_default":
+            continue
         for name in Path(path).parts:
             if (name in {".local", "jenkins.local.conf", "env_my_tools"} or
                     name.startswith(".env")) and not name.endswith(".example"):
-                raise ValueError("A runtime configuration/secret file was found in source or package context")
+                raise ValueError(f"Runtime configuration/secret path is not allowed here: {Path(path).as_posix()}")
 
 
 def verify_modules(repo, entries):
@@ -94,7 +98,8 @@ class Pipeline:
         data = {"release": f"b{number}-{main_commit[:12]}",
                 "repositories": [{"path": "my-tools", "commit": main_commit}],
                 "integrationTests": os.environ.get("RUN_INTEGRATION_TESTS", "true") == "true"}
-        reject_secret_names(run("git", "ls-files", cwd=self.repo, capture=True).splitlines())
+        reject_secret_names(run("git", "ls-files", cwd=self.repo, capture=True).splitlines(),
+                            allow_root_default=True)
         for entry in entries:
             target = self.workspace / "sources" / entry["path"]
             target.mkdir(parents=True)
