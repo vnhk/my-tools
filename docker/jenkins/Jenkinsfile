@@ -8,6 +8,8 @@ pipeline {
         timestamps()
     }
     parameters {
+        booleanParam(name: 'FORCE_REBUILD', defaultValue: false,
+            description: 'Ignore the successful snapshot and rebuild all source components.')
         booleanParam(name: 'RUN_INTEGRATION_TESTS', defaultValue: true,
             description: 'Run React integration tests against temporary CI databases/services.')
         booleanParam(name: 'EXPORT_IMAGES', defaultValue: true,
@@ -24,17 +26,31 @@ pipeline {
         stage('Checkout modules and record commits') {
             steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py checkout' }
         }
+        stage('Plan changes and restore successful artifacts') {
+            steps {
+                sh 'python3 sources/my-tools/docker/jenkins/pipeline.py plan'
+                script {
+                    env.BUILD_BACKEND = sh(returnStdout: true, script: 'python3 sources/my-tools/docker/jenkins/pipeline.py flag backend').trim()
+                    env.BUILD_FRONTEND = sh(returnStdout: true, script: 'python3 sources/my-tools/docker/jenkins/pipeline.py flag frontend').trim()
+                    env.BUILD_INTEGRATION = sh(returnStdout: true, script: 'python3 sources/my-tools/docker/jenkins/pipeline.py flag integration').trim()
+                    env.BUILD_TOOLS = sh(returnStdout: true, script: 'python3 sources/my-tools/docker/jenkins/pipeline.py flag tools').trim()
+                }
+            }
+        }
         stage('Prepare CI tool image') {
+            when { expression { env.BUILD_TOOLS == 'true' } }
             steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py tools' }
         }
         stage('Build and test Java backend') {
+            when { expression { env.BUILD_BACKEND == 'true' } }
             steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py backend' }
         }
         stage('Build and type-check React frontend') {
+            when { expression { env.BUILD_FRONTEND == 'true' } }
             steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py frontend' }
         }
         stage('Integration tests') {
-            when { expression { params.RUN_INTEGRATION_TESTS } }
+            when { expression { params.RUN_INTEGRATION_TESTS && env.BUILD_INTEGRATION == 'true' } }
             steps { sh 'python3 sources/my-tools/docker/jenkins/pipeline.py integration' }
         }
         stage('Package versioned application images') {
@@ -52,6 +68,7 @@ pipeline {
         }
         success {
             archiveArtifacts artifacts: 'release/*.tar.gz', allowEmptyArchive: true
+            sh 'python3 sources/my-tools/docker/jenkins/pipeline.py promote'
             echo 'Build completed in CI only. Production containers and production secrets were not accessed.'
         }
     }

@@ -16,12 +16,14 @@ It keeps Jenkins home and agent workspace; it does not touch production services
 | Main checkout | Clears only this job's `sources/` and `release/`, then checks out the SCM revision selected by Jenkins into `sources/my-tools`. |
 | Other checkouts | Fetches the 15 Maven module repositories, `bervan-utils` and `my-tools-react`, in detached HEAD mode. Checks every module in the root POM exists. |
 | Commit manifest | Writes the exact source commits to `release/release.json`. Branch references in `repositories.json` are resolved once per checkout; later stages do not pull again. |
+| Change plan | Compares commits with the last fully tested successful snapshot, validates cached artifact SHA-256 checksums and restores known-good Maven artifacts. Logs the selected modules and skipped components. |
 | CI tool image | Prepares Java 17, Maven, Node.js and Playwright browser dependencies in the CI Docker daemon. |
-| Backend | Builds/tests/installs the complete `bervan-utils` reactor first, then builds/tests/installs the backend reactor with the production build profile. React E2E suites are handled separately. |
-| Frontend | Runs `npm ci` and `npm run build`, including the existing TypeScript checks. |
-| Integration | Runs the existing `npm run test:integration` flow, starting Vite and the Java Testcontainers/Playwright suite against temporary CI services. |
+| Backend | Builds `bervan-utils` only when required, then builds/tests/installs selected backend modules with the production build profile. React E2E suites are handled separately. |
+| Frontend | Runs `npm ci` and `npm run build`, including TypeScript checks, only when the frontend requires rebuilding. |
+| Integration | When application sources change, starts Vite and runs the existing `ReactRunAllE2ETest` Testcontainers/Playwright suite against temporary CI services. Calls Maven without `-am` because dependency JARs are already installed/restored. |
 | Images | Packages the already built JAR/configuration and frontend `dist`; it does not rebuild Java or TypeScript. Records image IDs and tags. |
 | Export | Saves both application images as a gzip-compressed Docker archive and writes a SHA-256 checksum. Jenkins archives the release files. |
+| Successful snapshot | After successful stages and artifact archiving, saves verified reusable packages and Maven artifacts. Disabled integration tests do not replace this baseline. |
 
 There is no deploy stage in this version. A green job means the enabled build
 and test stages passed, not that production changed. The existing
@@ -52,6 +54,54 @@ The root checkout cannot be overwritten by an entry in the repository list.
 Missing repositories/modules, invalid paths and unsafe URLs fail the job rather
 than being silently skipped. A retry starts from clean source directories.
 The cache remains separate. No command uses `git stash` or `git pull`.
+
+## Incremental build decisions
+
+Every run still checks out all repositories to resolve their exact commit SHAs
+and inspect the current Maven dependency graph. Skipping compilation does not
+mean skipping source/version verification.
+
+| Change since the successful snapshot | Rebuild |
+| --- | --- |
+| First run, missing/corrupt snapshot, or `FORCE_REBUILD=true` | Utils, all backend modules, frontend and enabled integration tests. |
+| Main repository commit or repository set changed | Full rebuild; this conservatively covers build scripts, toolchain, runtime Dockerfiles and root POM changes, including documentation-only commits. |
+| `bervan-utils` | Utils and all backend modules; reuse frontend. |
+| `streaming-platform-app` only | Streaming and `my-tools-app`; reuse utils, other module JARs and frontend. |
+| Any other Maven module | Changed modules and all transitive consumers found in their POM dependencies; always repackage `my-tools-app`. |
+| Frontend only | Frontend plus enabled integration tests; reuse backend and utils JARs. The integration runner still compiles its own app/test classes in the fresh checkout. |
+| No source commits changed | Skip compilation and integration tests; reuse the fully tested backend/frontend artifacts and images. |
+
+POM dependency edges include profile dependencies, dependency management and parent
+references conservatively. Property-based artifact IDs or unsupported module
+coordinates fail explicitly rather than guessing a partial dependency graph.
+The current modules use literal `com.bervan` coordinates.
+
+The successful snapshot lives under this job's persistent `.cache/successful/`.
+It contains the manifest, packaging contexts, installed `com/bervan` Maven
+artifacts and a SHA-256 inventory. Before each run, the working Maven cache's
+`com/bervan` group is removed and restored from that verified snapshot. This
+prevents a failed run's partially installed `latest` artifacts from contaminating
+the next incremental build. Third-party dependency downloads remain cached.
+Sources are still checked out cleanly; old `target` directories are never reused.
+
+Unchanged runtime images are selected by the prior recorded image ID and retagged
+for the new release. If that image is absent from the CI daemon, only its runtime
+image is rebuilt using the verified cached JAR/dist, without recompiling sources.
+Reused images retain their original release label; use the new release manifest
+for the complete source-to-image mapping. Every export still includes both images.
+
+The snapshot is a workspace cache, not a registry or remote backup. Deleting it
+causes a full rebuild. A first successful build after introducing this feature
+is also full. Use one release job for this shared CI daemon. For scheduled
+revalidation of unchanged code, select `FORCE_REBUILD`. This forces source
+compilation, not an upgrade of cached external dependencies or base images;
+changing upstream dependencies without changing source commits is not detected
+automatically.
+
+Inspect the **Plan changes and restore successful artifacts** console output and
+`release.json` (`plan.changed`, `plan.modules`, `baseline`, image `reused` fields)
+to see exactly why stages ran or were skipped. The baseline advances only from
+the successful post-build path, and only when integration tests are enabled.
 
 ## Secret files: build versus production runtime
 
@@ -88,6 +138,8 @@ test failures by injecting the production environment file.
 - `RUN_INTEGRATION_TESTS`: enabled by default. Disabling it is useful while
   diagnosing the build but does not validate a production release. The manifest
   records whether integration testing was requested.
+- `FORCE_REBUILD`: disabled by default. Bypasses incremental reuse and rebuilds
+  all components, including utils, even when commits are unchanged.
 - `EXPORT_IMAGES`: enabled by default. Turning it off keeps images only in the
   CI daemon; no downloadable image archive is produced.
 

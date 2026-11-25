@@ -6,12 +6,14 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import sys
 import unittest
 from unittest.mock import Mock, patch
 import xml.etree.ElementTree as ET
 
 
 DIRECTORY = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(DIRECTORY))
 spec = importlib.util.spec_from_file_location("ci_pipeline", DIRECTORY / "pipeline.py")
 ci = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ci)

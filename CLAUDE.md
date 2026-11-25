@@ -53,6 +53,10 @@ cd <module> && mvn clean install -DskipTests
 and CI-only Docker daemon. Its lifecycle wrapper never loads production Compose
 or application/MCP `.env` files and only stops CI services. It currently provides
 installation, a smoke job and a multi-repository build/test/image-export pipeline.
+Incremental builds compare repository commits with a checksummed successful
+artifact snapshot, rebuild transitive Maven consumers and reuse unchanged images.
+Use `FORCE_REBUILD` to rebuild all components; failed/untested runs do not advance
+the reusable baseline. See `docker/jenkins/PIPELINE.md` for cache and test behavior.
 The release pipeline never loads production environment files or deploys containers.
 See `docker/jenkins/README.md` before running it on the server.
 

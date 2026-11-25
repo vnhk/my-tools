@@ -11,6 +11,7 @@ import subprocess
 import sys
 from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
+from incremental import SCHEMA, inventory, load_snapshot, make_plan, module_graph, plan_flag
 
 
 TOOLS_IMAGE = "my-tools-ci-tools:local"
@@ -111,6 +112,58 @@ class Pipeline:
         run("docker", "build", "--file", str(self.config / "build.Dockerfile"),
             "--tag", TOOLS_IMAGE, str(self.config))
 
+    def plan(self):
+        data = self.metadata()
+        baseline = self.cache / "successful"
+        previous = load_snapshot(baseline)
+        plan = make_plan(data["repositories"], previous, module_graph(self.repo),
+                         os.environ.get("FORCE_REBUILD", "false") == "true")
+        # Failed builds may have installed partial/latest artifacts. Restore only
+        # our own Maven group from the verified successful snapshot every time.
+        local = self.cache / "m2/com/bervan"
+        if local.exists():
+            shutil.rmtree(local)
+        if previous and not plan["full"]:
+            shutil.copytree(baseline / "maven/com/bervan", local)
+        contexts = self.workspace / "package-contexts"
+        if contexts.exists():
+            shutil.rmtree(contexts)
+        if previous and not plan["full"]:
+            shutil.copytree(baseline / "contexts", contexts)
+        data["plan"] = plan
+        data["baseline"] = previous["release"] if previous else None
+        self.save(data)
+        print(json.dumps(plan, indent=2))
+
+    def flag(self, name):
+        print(plan_flag(self.metadata(), name))
+
+    def promote(self):
+        data = self.metadata()
+        if not data["integrationTests"]:
+            print("Integration tests disabled: retaining the last fully tested snapshot")
+            return
+        data["snapshotSchema"] = SCHEMA
+        staging = self.cache / "successful-next"
+        backup = self.cache / "successful-old"
+        for path in [staging, backup]:
+            if path.exists():
+                shutil.rmtree(path)
+        staging.mkdir()
+        shutil.copytree(self.cache / "m2/com/bervan", staging / "maven/com/bervan")
+        shutil.copytree(self.workspace / "package-contexts", staging / "contexts")
+        (staging / "release.json").write_text(json.dumps(data, indent=2) + "\n")
+        (staging / "checksums.json").write_text(json.dumps(inventory(staging), indent=2) + "\n")
+        if not load_snapshot(staging):
+            raise ValueError("Incomplete successful snapshot; previous baseline retained")
+        baseline = self.cache / "successful"
+        if baseline.exists():
+            baseline.rename(backup)
+        staging.rename(baseline)
+        if backup.exists():
+            shutil.rmtree(backup)
+        print(f"Recorded successful snapshot: {data['release']}")
+
     def container_command(self, step):
         return ["docker", "run", "--rm", "--init", "--memory=2300m", "--memory-swap=2300m", "--cpus=2",
                 "--name", self.container_name(),
@@ -140,24 +193,41 @@ class Pipeline:
     def images(self):
         data = self.metadata()
         contexts = self.workspace / "package-contexts"
-        if contexts.exists():
-            shutil.rmtree(contexts)
         backend = contexts / "backend"
         frontend = contexts / "frontend"
-        backend.mkdir(parents=True)
-        frontend.mkdir()
-        shutil.copy2(self.repo / "my-tools-app/target/my-tools-app.jar", backend / "my-tools-app.jar")
-        shutil.copytree(self.repo / "my-tools-app/configuration", backend / "configuration")
-        react = self.workspace / "sources/my-tools-react"
-        shutil.copytree(react / "dist", frontend / "dist")
-        shutil.copy2(react / "nginx.conf", frontend / "nginx.conf")
+        plan = data["plan"]
+        if plan["backend"]:
+            if backend.exists():
+                shutil.rmtree(backend)
+            backend.mkdir(parents=True)
+            shutil.copy2(self.repo / "my-tools-app/target/my-tools-app.jar", backend / "my-tools-app.jar")
+            shutil.copytree(self.repo / "my-tools-app/configuration", backend / "configuration")
+        if plan["frontend"]:
+            if frontend.exists():
+                shutil.rmtree(frontend)
+            frontend.mkdir(parents=True)
+            react = self.workspace / "sources/my-tools-react"
+            shutil.copytree(react / "dist", frontend / "dist")
+            shutil.copy2(react / "nginx.conf", frontend / "nginx.conf")
         reject_secret_names([p.relative_to(contexts) for p in contexts.rglob("*")])
         images = []
         for component, context in [("backend", backend), ("frontend", frontend)]:
             tag = f"my-tools-{component}:{data['release']}"
-            run("docker", "build", "--label", f"com.bervan.release={data['release']}",
-                "--file", str(self.config / f"{component}.Dockerfile"), "--tag", tag, str(context))
+            reused = False
+            if not plan[component]:
+                baseline = load_snapshot(self.cache / "successful")
+                previous_image = next(i for i in baseline["images"] if i["component"] == component)
+                exists = subprocess.run(["docker", "image", "inspect", previous_image["id"]],
+                                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+                if exists:
+                    run("docker", "tag", previous_image["id"], tag)
+                    reused = True
+            if not reused:
+                # Missing CI image: rebuild only its runtime package from verified artifacts.
+                run("docker", "build", "--label", f"com.bervan.release={data['release']}",
+                    "--file", str(self.config / f"{component}.Dockerfile"), "--tag", tag, str(context))
             images.append({"component": component, "tag": tag,
+                           "reused": reused,
                            "id": run("docker", "image", "inspect", "--format", "{{.Id}}", tag, capture=True)})
         data["images"] = images
         self.save(data)
@@ -194,7 +264,9 @@ def main():
     stage = sys.argv[1]
     if stage in {"backend", "frontend", "integration"}:
         pipeline.build(stage)
-    elif stage in {"checkout", "tools", "images", "export"}:
+    elif stage == "flag":
+        pipeline.flag(sys.argv[2])
+    elif stage in {"checkout", "plan", "tools", "images", "export", "promote"}:
         getattr(pipeline, stage)()
     else:
         raise ValueError("Unknown pipeline stage")
