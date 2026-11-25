@@ -122,7 +122,8 @@ class Pipeline:
         baseline = self.cache / "successful"
         previous = load_snapshot(baseline)
         plan = make_plan(data["repositories"], previous, module_graph(self.repo),
-                         os.environ.get("FORCE_REBUILD", "false") == "true")
+                         os.environ.get("FORCE_REBUILD", "false") == "true",
+                         integration_enabled=data["integrationTests"])
         # Failed builds may have installed partial/latest artifacts. Restore only
         # our own Maven group from the verified successful snapshot every time.
         local = self.cache / "m2/com/bervan"
@@ -136,6 +137,9 @@ class Pipeline:
         if previous and not plan["full"]:
             shutil.copytree(baseline / "contexts", contexts)
         data["plan"] = plan
+        # A prior result applies only to identical inputs. Otherwise the actual
+        # successful integration command must record a new passing result.
+        data["integrationPassed"] = bool(previous and not plan["integration"])
         data["baseline"] = previous["release"] if previous else None
         self.save(data)
         print(json.dumps(plan, indent=2))
@@ -145,9 +149,6 @@ class Pipeline:
 
     def promote(self):
         data = self.metadata()
-        if not data["integrationTests"]:
-            print("Integration tests disabled: retaining the last fully tested snapshot")
-            return
         data["snapshotSchema"] = SCHEMA
         staging = self.cache / "successful-next"
         backup = self.cache / "successful-old"
@@ -190,6 +191,10 @@ class Pipeline:
             # Only the explicitly named tool container on the guarded CI daemon.
             subprocess.run(["docker", "rm", "--force", self.container_name()],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if step == "integration":
+            data = self.metadata()
+            data["integrationPassed"] = True
+            self.save(data)
 
     def container_name(self):
         identity = f"{self.workspace}:{os.environ.get('BUILD_NUMBER', '0')}"

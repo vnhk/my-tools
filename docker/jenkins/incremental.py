@@ -30,7 +30,7 @@ def module_graph(repo):
     return graph
 
 
-def make_plan(repositories, previous, graph, force=False):
+def make_plan(repositories, previous, graph, force=False, integration_enabled=True):
     current = {r["path"]: r["commit"] for r in repositories}
     old = {r["path"]: r["commit"] for r in previous["repositories"]} if previous else {}
     changed = sorted(p for p in current.keys() | old.keys() if current.get(p) != old.get(p))
@@ -48,10 +48,12 @@ def make_plan(repositories, previous, graph, force=False):
         selected.add("my-tools-app")  # Always repackage the deployable backend.
     reason = "forced" if force else "no valid successful snapshot" if previous is None else "root/manifest changed" if full else "commit comparison"
     frontend = full or "my-tools-react" in changed
+    integration = bool(selected) or frontend or not (previous or {}).get("integrationPassed", False)
     return {"schema": SCHEMA, "reason": reason, "changed": changed, "full": full,
             "utils": utils, "modules": [m for m in graph if m in selected],
             "backend": bool(selected), "frontend": frontend,
-            "integration": bool(selected) or frontend, "tools": bool(selected) or frontend}
+            "integration": integration,
+            "tools": bool(selected) or frontend or (integration and integration_enabled)}
 
 
 def inventory(directory):
@@ -76,7 +78,7 @@ def load_snapshot(directory):
             return None
         data = json.loads((directory / "release.json").read_text())
         required = ["contexts/backend/my-tools-app.jar", "contexts/frontend/nginx.conf"]
-        if (data.get("snapshotSchema") != SCHEMA or not data.get("integrationTests") or
+        if (data.get("snapshotSchema") != SCHEMA or
                 not data.get("repositories") or not data.get("images") or
                 any(not (directory / name).is_file() for name in required) or
                 not (directory / "contexts/frontend/dist").is_dir() or

@@ -20,7 +20,7 @@ class IncrementalTests(unittest.TestCase):
         entries = json.loads((DIRECTORY / "repositories.json").read_text())
         cls.repositories = [{"path": "my-tools", "commit": "root1"}] + [
             {"path": e["path"], "commit": "old"} for e in entries]
-        cls.previous = {"repositories": cls.repositories}
+        cls.previous = {"repositories": cls.repositories, "integrationPassed": True}
 
     def plan(self, *changed, previous=True, force=False):
         current = [{**r, "commit": "new" if r["path"] in changed else r["commit"]} for r in self.repositories]
@@ -97,7 +97,7 @@ class IncrementalTests(unittest.TestCase):
         pipeline.save({"release": "b1-root", "repositories": self.repositories,
                        "images": [{"component": "backend", "id": "sha256:backend"},
                                   {"component": "frontend", "id": "sha256:frontend"}],
-                       "integrationTests": True})
+                       "integrationTests": True, "integrationPassed": True})
         return pipeline
 
     def test_snapshot_integrity_detects_corruption_and_missing_artifacts(self):
@@ -122,18 +122,57 @@ class IncrementalTests(unittest.TestCase):
                 pipeline.plan()
             self.assertEqual(jar.read_bytes(), b"tested library")
             self.assertFalse(pipeline.metadata()["plan"]["backend"])
+            self.assertTrue(pipeline.metadata()["integrationPassed"])
             self.assertEqual((pipeline.workspace / "package-contexts/backend/my-tools-app.jar").read_bytes(), b"tested backend")
 
-    def test_disabled_integration_does_not_replace_tested_baseline(self):
+    def test_disabled_integration_saves_reusable_artifacts_and_requires_tests_when_reenabled(self):
         with tempfile.TemporaryDirectory() as tmp:
             pipeline = self.fixture_pipeline(Path(tmp))
             pipeline.promote()
-            before = inc.inventory(pipeline.cache / "successful")
             data = pipeline.metadata()
-            data.update(integrationTests=False, release="b2-untested")
+            data.update(integrationTests=False, integrationPassed=False, release="b2-untested")
             pipeline.save(data)
             pipeline.promote()
-            self.assertEqual(inc.inventory(pipeline.cache / "successful"), before)
+            baseline = inc.load_snapshot(pipeline.cache / "successful")
+            self.assertEqual(baseline["release"], "b2-untested")
+            self.assertFalse(baseline["integrationPassed"])
+            for enabled in [False, True]:
+                data["integrationTests"] = enabled
+                pipeline.save(data)
+                with patch("pipeline.module_graph", return_value=self.graph):
+                    pipeline.plan()
+                plan = pipeline.metadata()["plan"]
+                self.assertFalse(plan["backend"])
+                self.assertFalse(plan["frontend"])
+                self.assertTrue(plan["integration"])
+                self.assertEqual(plan["tools"], enabled)
+
+    def test_integration_result_is_recorded_only_after_successful_command(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            pipeline = self.fixture_pipeline(Path(tmp))
+            pipeline.config = pipeline.repo / "docker/jenkins"
+            data = pipeline.metadata()
+            data["integrationPassed"] = False
+            pipeline.save(data)
+            with patch("pipeline.run", side_effect=RuntimeError("test failure")), patch("pipeline.subprocess.run"):
+                with self.assertRaises(RuntimeError):
+                    pipeline.build("integration")
+            self.assertFalse(pipeline.metadata()["integrationPassed"])
+            with patch("pipeline.run"), patch("pipeline.subprocess.run"):
+                pipeline.build("integration")
+            self.assertTrue(pipeline.metadata()["integrationPassed"])
+
+    def test_source_change_invalidates_previous_integration_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            pipeline = self.fixture_pipeline(Path(tmp))
+            pipeline.promote()
+            data = pipeline.metadata()
+            data["repositories"][1]["commit"] = "new-code"
+            pipeline.save(data)
+            with patch("pipeline.module_graph", return_value=self.graph):
+                pipeline.plan()
+            self.assertFalse(pipeline.metadata()["integrationPassed"])
+            self.assertTrue(pipeline.metadata()["plan"]["integration"])
 
     def test_unchanged_images_are_reused_by_id_or_repackaged_if_daemon_cache_was_lost(self):
         for image_available in [True, False]:

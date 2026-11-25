@@ -16,14 +16,14 @@ It keeps Jenkins home and agent workspace; it does not touch production services
 | Main checkout | Clears only this job's `sources/` and `release/`, then checks out the SCM revision selected by Jenkins into `sources/my-tools`. |
 | Other checkouts | Fetches the 15 Maven module repositories, `bervan-utils` and `my-tools-react`, in detached HEAD mode. Checks every module in the root POM exists. |
 | Commit manifest | Writes the exact source commits to `release/release.json`. Branch references in `repositories.json` are resolved once per checkout; later stages do not pull again. |
-| Change plan | Compares commits with the last fully tested successful snapshot, validates cached artifact SHA-256 checksums and restores known-good Maven artifacts. Logs the selected modules and skipped components. |
+| Change plan | Compares commits with the last successful snapshot, validates cached artifact SHA-256 checksums and restores built Maven artifacts. Integration validation is tracked separately. Logs the selected modules and skipped components. |
 | CI tool image | Prepares Java 17, Maven, Node.js and Playwright browser dependencies in the CI Docker daemon. |
 | Backend | Builds `bervan-utils` only when required, then builds/tests/installs selected backend modules with the production build profile. React E2E suites are handled separately. |
 | Frontend | Runs `npm ci` and `npm run build`, including TypeScript checks, only when the frontend requires rebuilding. |
 | Integration | When application sources change, starts Vite and runs the existing `ReactRunAllE2ETest` Testcontainers/Playwright suite against temporary CI services. Calls Maven without `-am` because dependency JARs are already installed/restored. |
 | Images | Packages the already built JAR/configuration and frontend `dist`; it does not rebuild Java or TypeScript. Records image IDs and tags. |
 | Export | Saves both application images as a gzip-compressed Docker archive and writes a SHA-256 checksum. Jenkins archives the release files. |
-| Successful snapshot | After successful stages and artifact archiving, saves verified reusable packages and Maven artifacts. Disabled integration tests do not replace this baseline. |
+| Successful snapshot | After successful stages and artifact archiving, saves verified reusable packages and Maven artifacts, including when integration is disabled. Records integration validation separately. |
 
 There is no deploy stage in this version. A green job means the enabled build
 and test stages passed, not that production changed. The existing
@@ -69,7 +69,7 @@ mean skipping source/version verification.
 | `streaming-platform-app` only | Streaming and `my-tools-app`; reuse utils, other module JARs and frontend. |
 | Any other Maven module | Changed modules and all transitive consumers found in their POM dependencies; always repackage `my-tools-app`. |
 | Frontend only | Frontend plus enabled integration tests; reuse backend and utils JARs. The integration runner still compiles its own app/test classes in the fresh checkout. |
-| No source commits changed | Skip compilation and integration tests; reuse the fully tested backend/frontend artifacts and images. |
+| No source commits changed | Reuse backend/frontend artifacts and images. Skip integration only if the same inputs already passed it, or the user disables it. |
 
 POM dependency edges include profile dependencies, dependency management and parent
 references conservatively. Property-based artifact IDs or unsupported module
@@ -101,7 +101,22 @@ automatically.
 Inspect the **Plan changes and restore successful artifacts** console output and
 `release.json` (`plan.changed`, `plan.modules`, `baseline`, image `reused` fields)
 to see exactly why stages ran or were skipped. The baseline advances only from
-the successful post-build path, and only when integration tests are enabled.
+the successful post-build path. Failed or aborted builds do not replace it.
+
+`integrationTests` records whether tests were requested in this run;
+`integrationPassed` records whether these exact inputs passed integration, either
+in this run or a previous successful run with identical inputs. Skipping tests
+does not manufacture a passing result. Any source change or forced rebuild
+invalidates the inherited result. Older snapshots without this field are treated
+as not yet integration-validated, but their build artifacts remain reusable.
+
+For example, a successful build with integration disabled saves compiled artifacts
+with `integrationPassed=false`. Another run without code changes can reuse those
+artifacts. Once integration is enabled, it prepares the CI tool image and runs
+the integration suite without rebuilding utils, backend packages or frontend
+dist. The integration runner may still compile its own app/test classes and
+install Node dependencies in the fresh checkout. A failed integration suite
+does not advance the snapshot; a successful suite records the passing result.
 
 ## Secret files: build versus production runtime
 
