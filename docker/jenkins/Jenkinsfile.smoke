@@ -8,6 +8,18 @@ pipeline {
         timestamps()
     }
     stages {
+        stage('Checkout main repository') {
+            steps {
+                deleteDir()
+                checkout scm
+                sh '''
+                    set -eu
+                    git rev-parse --short HEAD
+                    test -f pom.xml
+                    echo "Main repository checked out successfully"
+                '''
+            }
+        }
         stage('Verify isolated Docker access') {
             steps {
                 sh '''

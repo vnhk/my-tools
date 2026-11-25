@@ -101,11 +101,18 @@ commits or pipeline definitions. This bootstrap credential remains configured by
    Do not copy the whole command from the node page, only its secret value.
 3. Run `bash docker/jenkins/jenkins.sh start` again. It detects a nonempty secret
    and starts the CI daemon and agent as well as the controller.
-4. Confirm the `my-tools-builder` node is online. Create a Pipeline job and paste
-   the contents of `Jenkinsfile.smoke` as its script. Run it once.
+4. Confirm the `my-tools-builder` node is online. Create a Pipeline job using
+   **Pipeline script from SCM**, select Git, configure the main repository URL
+   and branch, and set **Script Path** to `docker/jenkins/Jenkinsfile.smoke`.
+   Commit and push the pipeline file before running the job. Public HTTPS
+   repositories do not require checkout credentials.
 
 The agent connects via WebSocket; no additional Jenkins agent port is exposed.
-The smoke job verifies tooling/access only. It does not build or deploy the app.
+The smoke job clears only its agent workspace, checks out the configured main
+repository using `checkout scm`, prints its commit and verifies `pom.xml`, then
+checks Docker tooling/access. Separately versioned modules are not checked out
+yet. This pipeline requires an SCM-backed job, not an inline Pipeline script.
+It does not build or deploy the app.
 
 ## Nightly manual usage
 
