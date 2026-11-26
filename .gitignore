@@ -67,3 +67,4 @@ env_my_tools
 /.kilo/
 
 .env
+/.jenkins-deploy/

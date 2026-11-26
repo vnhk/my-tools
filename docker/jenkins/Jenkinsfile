@@ -1,6 +1,7 @@
 pipeline {
     agent { label 'my-tools-builder' }
     options {
+        copyArtifactPermission('my-tools-deploy')
         skipDefaultCheckout(true)
         disableConcurrentBuilds()
         timeout(time: 180, unit: 'MINUTES')

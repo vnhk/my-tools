@@ -1,165 +1,62 @@
-# On-demand Jenkins on the production host
-
-This is the installation/bootstrap stage of JNKS. It does not deploy My Tools or
-run `linux-build-script.sh`. Existing production containers, configuration and
-volumes are not used by this stack. A full build/test/image-export pipeline is
-available in `Jenkinsfile`; see [PIPELINE.md](PIPELINE.md) for setup and a detailed
-stage-by-stage explanation. Production deployment is not configured.
-
-## Isolation and resources
-
-The fixed Compose project name is `my-tools-jenkins`. Its named volumes store
-Jenkins configuration/history, agent workspace and the **separate CI Docker
-daemon's** images/cache. No host Docker socket, production data directory or
-production volume is mounted into CI. No CI Docker ports are published.
-
-Build commands sent to `tcp://docker:2376` act on the CI daemon, not production
-Docker. This first version intentionally cannot deploy to production or change
-production containers. CI images also are not production-host images: transferring
-an approved image will require an explicit later release/deployment step.
-
-| Service | Memory ceiling | CPU ceiling | Purpose |
-| --- | --- | --- | --- |
-| Jenkins controller | 1 GiB (512 MiB heap) | 1 CPU | UI, scheduling, configuration |
-| Agent | 512 MiB (256 MiB heap) | 1 CPU | One executor, Git and Docker CLI |
-| CI Docker daemon | 3 GiB, no additional swap | 2 CPUs | Container builds and their cache |
-
-Build backend and frontend sequentially. The nominal CI budget is 4.5 GiB, but
-resource ceilings are not a guarantee that the entire server fits in RAM.
-The current production application permits a 9 GiB Java heap, in addition to JVM
-overhead, MariaDB, RabbitMQ and the OS. Monitor the first real build using
-`docker stats` and `free -h`. On Linux, verify memory accounting for nested build
-containers before relying on the CI daemon's limit as an aggregate build limit.
-
-Docker-in-Docker requires a privileged container. This avoids sharing production
-Docker control, but is not a security boundary against malicious pipelines:
-restrict Jenkins to trusted administrators and trusted code. Stop the stack
-when not in use. The controller uses `on-failure:3` so Jenkins' UI restart can
-bring it back after plugin installation (up to three restart attempts). Explicit
-`jenkins.sh stop` still leaves it stopped; `on-failure` does not start it when the
-Docker daemon restarts. The CI daemon and agent retain restart policy `no`.
-The official controller image already includes Tini; do not add Compose `init`
-to that service. The inbound agent retains `init: true` for subprocess handling.
+# Jenkins: setup and deployment
 
 ## Requirements
 
-- Linux server, Docker Engine, Docker Compose v2, Bash and OpenSSL.
-- Internet access for official Jenkins/Docker images and Jenkins plugins.
-- Space for an additional copy of images, caches and build workspaces.
-- The files in this directory on the server; run all lifecycle commands **there**.
+Linux, Docker Engine + Compose v2, Git, Bash, OpenSSL, Docker permissions,
+internet access and disk/RAM capacity for CI alongside production.
+Java, Maven, Node.js and Python run in containers.
+Deployment updates an existing application on the same server, using its
+`docker-compose.yml`, `.env_my_tools` and data. Only trusted jobs may use host Docker.
 
-Image tags initially select supported release families (Jenkins LTS/Java 21 and
-Docker 29). After a successful first boot, record and pin tested image digests and
-plugin versions before treating installation as reproducible across upgrades.
-`start` does not request pulls of newer base images; image/plugin rebuilds still
-depend on the build cache. Schedule and test upgrades deliberately.
+## Install once
 
-## First start
+1. Use the existing production repo and run `git pull --ff-only`.
+   If no checkout exists, clone it (this alone does not install the application):
+   ```sh
+   git clone https://github.com/vnhk/my-tools.git
+   cd my-tools
+   ```
+   Run remaining commands from the repo. Jenkins clones all build modules itself.
+2. Create settings and set `JENKINS_BIND_ADDRESS` to the server's LAN IP:
+   ```sh
+   cp -n docker/jenkins/jenkins.config.example docker/jenkins/jenkins.local.conf
+   nano docker/jenkins/jenkins.local.conf
+   bash docker/jenkins/jenkins.sh start
+   ```
+   If CI uses a separate checkout, set `MY_TOOLS_PRODUCTION_DIR` to production there.
+3. Open the printed URL (default port `8092`, trusted LAN only). User: `admin`.
+   Read the password: `cat docker/jenkins/.local/admin-password`.
+4. **Manage Jenkins → Nodes → my-tools-builder**: copy its inbound secret into
+   `docker/jenkins/.local/agent-secret`. Run `jenkins.sh start` again and check the
+   node is online. No SSH keys are needed. Keep local settings/secrets out of Git.
+5. Create Pipeline jobs: **Pipeline script from SCM → Git**,
+   URL `https://github.com/vnhk/my-tools.git`, branch `*/main`:
 
-From any directory, using the correct path to this checkout:
+   | Job name | Script Path |
+   | --- | --- |
+   | `my-tools-build` | `docker/jenkins/Jenkinsfile` |
+   | `my-tools-deploy` | `docker/jenkins/Jenkinsfile.deploy` |
 
-```sh
-cp docker/jenkins/jenkins.config.example docker/jenkins/jenkins.local.conf
-# Edit jenkins.local.conf and set JENKINS_BIND_ADDRESS to the server's LAN IP.
-bash docker/jenkins/jenkins.sh start
-bash docker/jenkins/jenkins.sh status
-```
+## Build and deploy
 
-The first start builds and starts only the controller. Local generated secrets
-are under `.local/` next to this README, excluded from Git. Existing files are
-never overwritten. Neither application nor MCP `.env` files are read by the wrapper.
-An optional exported `JENKINS_LOCAL_DIR` can select another absolute secret directory.
+1. Commit/push code. Run `my-tools-build` with `EXPORT_IMAGES=true` and wait for
+   **Finished: SUCCESS**. `RUN_INTEGRATION_TESTS` can be disabled;
+   `FORCE_REBUILD=true` bypasses cache. If parameters are missing, run the job once.
+2. Run `my-tools-deploy`: select `plan`, then `deploy`. Blank `SOURCE_BUILD` selects
+   the latest successful build; enter a number for a specific release.
+3. To restore previous images, select `rollback`. Failed deployment also attempts
+   automatic recovery. **Image rollback does not undo database changes: keep backups.**
 
-Open the URL printed by `start` from your LAN; no SSH tunnel is required.
-The port binds specifically to the configured server LAN address, not every
-host interface. Authentication remains required. This endpoint uses HTTP, so
-credentials and sessions are not protected by TLS; use only a trusted LAN and
-do not forward port 8092 from the Internet. HTTPS can be added separately.
+The existing `.env_my_tools` is loaded automatically; no per-release file copying.
+Only application containers are replaced, briefly interrupting service; data and
+infrastructure remain. Frontend-only changes do not restart backend.
+Health URLs/settings: `deploy.config.json`. Deployment state: `.jenkins-deploy/`.
+Successful builds cache artifacts even without integration; enabling it later tests
+unvalidated inputs. Changed modules and POM consumers rebuild; failed runs keep cache.
 
-Network configuration is local and ignored by Git. The wrapper sources the
-operator-owned `jenkins.local.conf` as trusted Bash configuration. Alternatively,
-export the settings before running the wrapper (file values override exports).
-`JENKINS_BIND_ADDRESS` is required for `start` and `validate` and must exist on the
-server. `JENKINS_PORT` defaults to 8092. `JENKINS_PUBLIC_URL` is automatically
-derived from these values, or can be overridden for a DNS name or HTTPS proxy.
-When binding to a wildcard address, provide a concrete public URL explicitly.
-To restore SSH-only access, bind to `127.0.0.1` and forward the configured port
-over SSH. `stop`, `status` and `logs` remain usable even without local network
-configuration; they do not change the running containers' port bindings.
+## Start, stop and update CI
 
-Username: `admin`. Read the generated password
-locally from `docker/jenkins/.local/admin-password`; do not paste it into chat,
-commits or pipeline definitions. This bootstrap credential remains configured by
-`jenkins.yaml` on each start. Password rotation must update its secret source too.
-
-### Connect the one-time build agent
-
-1. In Jenkins, open **Manage Jenkins → Nodes → my-tools-builder**.
-2. Copy its inbound agent secret to `docker/jenkins/.local/agent-secret` on the
-   server, replacing the empty file. Keep its enclosing `.local/` directory private
-   (mode 0700). The wrapper makes the mounted secret files readable by the
-   containers while other host users cannot traverse that directory.
-   Do not copy the whole command from the node page, only its secret value.
-3. Run `bash docker/jenkins/jenkins.sh start` again. It detects a nonempty secret
-   and starts the CI daemon and agent as well as the controller.
-4. Confirm the `my-tools-builder` node is online. Create a Pipeline job using
-   **Pipeline script from SCM**, select Git, configure the main repository URL
-   and branch, and set **Script Path** to `docker/jenkins/Jenkinsfile.smoke`.
-   Commit and push the pipeline file before running the job. Public HTTPS
-   repositories do not require checkout credentials.
-
-The agent connects via WebSocket; no additional Jenkins agent port is exposed.
-The smoke job clears only its agent workspace, checks out the configured main
-repository using `checkout scm`, prints its commit and verifies `pom.xml`, then
-checks Docker tooling/access. Separately versioned modules are not checked out
-yet. This pipeline requires an SCM-backed job, not an inline Pipeline script.
-It does not build or deploy the app.
-
-## Nightly manual usage
-
-```sh
-# Start CI; it restores existing configuration and cache.
-bash docker/jenkins/jenkins.sh start
-
-# Run your job in Jenkins and wait for it to finish before stopping CI.
-bash docker/jenkins/jenkins.sh stop
-```
-
-`stop` targets only `agent`, `jenkins`, and `docker` in `my-tools-jenkins`.
-It does not execute `down`, remove volumes, prune Docker or touch the production
-Compose stack. Stopping during a running job interrupts that job; it is not
-an automatic drain/wait command. Source changes are never stashed, reset or pulled
-by the lifecycle script.
-
-Use `logs agent`, `logs docker`, `logs jenkins` and `status` for diagnosis. Logs
-can include sensitive plugin/job diagnostics; inspect them locally before sharing.
-
-If a UI restart stops an older controller configured with `restart: "no"`, run
-`jenkins.sh start` after updating this Compose file. It recreates only the CI
-controller when needed, preserving Jenkins home and installed plugins; production
-containers are not involved. Readiness is confirmed by the log message
-`Jenkins is fully up and running`, not by the browser's restart waiting screen.
-
-## Persistence, backups and next steps
-
-Keep the named volumes and `.local/` secrets when stopping or updating CI.
-Back up Jenkins home and the generated admin credential while CI is stopped,
-encrypt backups and verify a restore into an isolated instance. Never run global
-`docker system prune --volumes` or Compose `down -v` as a CI cleanup step on this host.
-
-Next: run the full build pipeline described in [PIPELINE.md](PIPELINE.md), confirm
-repository access, and validate tests and exported release artifacts on Linux. Before
-adding deployment, inventory production bind mounts, named volumes and any data
-in container writable layers. Do not replace a production container until that
-data and recovery path have been verified with the owner.
-
-## Local checks
-
-```sh
-bash -n docker/jenkins/jenkins.sh
-bash docker/jenkins/jenkins.sh validate
-python3 -m unittest discover -s docker/jenkins/tests -v
-```
-
-Configuration rendering and wrapper tests do not prove images boot successfully.
-Validate the real Linux installation and smoke job before closing JNKS-0003/0005.
+Use `bash docker/jenkins/jenkins.sh start` before jobs, `stop` after they finish.
+Use `status` or `logs agent` / `logs docker` / `logs jenkins` for diagnostics.
+After updating CI tooling in the server repo, rerun `start`. Production stays running.
+Keep Jenkins volumes and `.local/`; do not run volume deletion or global Docker prune.

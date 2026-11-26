@@ -20,6 +20,7 @@ fi
 # network configuration. They never create or update a container.
 export JENKINS_BIND_ADDRESS="${JENKINS_BIND_ADDRESS:-127.0.0.1}"
 export JENKINS_PUBLIC_URL="${JENKINS_PUBLIC_URL:-http://${JENKINS_BIND_ADDRESS}:${JENKINS_PORT}/}"
+export MY_TOOLS_PRODUCTION_DIR="${MY_TOOLS_PRODUCTION_DIR:-$(cd -- "$script_dir/../.." && pwd)}"
 
 compose() {
   # Do not load the repository's .env or production Compose configuration.

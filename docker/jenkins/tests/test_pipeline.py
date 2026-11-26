@@ -47,7 +47,7 @@ class PipelineTests(unittest.TestCase):
             ci.validate_repository({**entry, "revision": "--upload-pack=bad"})
 
     def test_secret_paths_rejected_without_reading_file_contents(self):
-        for path in [".env", ".env_my_tools", "module/.env.local", "env_my_tools", "configuration/.local/key", "jenkins.local.conf"]:
+        for path in [".env", ".env_my_tools", "module/.env.local", "env_my_tools", "configuration/.local/key", "jenkins.local.conf", ".jenkins-deploy/current.json"]:
             with self.subTest(path=path), self.assertRaises(ValueError):
                 ci.reject_secret_names([path])
         ci.reject_secret_names([".env.example", "module/.env.local.example", "configuration/app.properties"])

@@ -1,0 +1,9 @@
+{
+  "compose_file": "docker-compose.yml",
+  "env_file": ".env_my_tools",
+  "frontend_url": "https://127.0.0.1/",
+  "backend_url": "https://127.0.0.1/api/config",
+  "tls_verify": false,
+  "health_timeout_seconds": 240,
+  "max_archive_bytes": 10737418240
+}

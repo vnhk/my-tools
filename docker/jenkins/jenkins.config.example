@@ -4,3 +4,5 @@ JENKINS_BIND_ADDRESS=
 JENKINS_PORT=8092
 # Optional override for a reverse proxy or DNS name. Otherwise derived above.
 # JENKINS_PUBLIC_URL=https://jenkins.example.com/
+# Production checkout is detected automatically by jenkins.sh.
+# MY_TOOLS_PRODUCTION_DIR=/absolute/path/to/production/my-tools

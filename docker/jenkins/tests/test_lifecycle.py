@@ -21,6 +21,9 @@ class LifecycleTests(unittest.TestCase):
             "import json, os, sys\n"
             "with open(os.environ['DOCKER_CALLS'], 'a') as f:\n"
             "    f.write(json.dumps(sys.argv[1:]) + '\\n')\n"
+            "if os.environ.get('DEPLOY_SETTINGS_CAPTURE'):\n"
+            "    with open(os.environ['DEPLOY_SETTINGS_CAPTURE'], 'w') as f:\n"
+            "        json.dump({k: os.environ.get(k) for k in ['MY_TOOLS_PRODUCTION_DIR']}, f)\n"
         )
         docker.chmod(0o755)
         self.env = {
@@ -60,6 +63,18 @@ class LifecycleTests(unittest.TestCase):
         password = (self.secrets / "admin-password").read_text().strip()
         self.assertNotIn(password, result.stdout + result.stderr)
         self.assertIn("http://192.0.2.10:18092/", result.stdout)
+
+    def test_deployment_defaults_follow_host_checkout_and_allow_one_time_overrides(self):
+        capture = self.root / "deploy-settings.json"
+        self.env["DEPLOY_SETTINGS_CAPTURE"] = str(capture)
+        for name in ["MY_TOOLS_PRODUCTION_DIR"]:
+            self.env.pop(name, None)
+        self.run_command("start")
+        self.assertEqual(json.loads(capture.read_text()), {
+            "MY_TOOLS_PRODUCTION_DIR": str(SCRIPT.parents[2])})
+        self.env.update(MY_TOOLS_PRODUCTION_DIR="/srv/other checkout")
+        self.run_command("start")
+        self.assertEqual(json.loads(capture.read_text())["MY_TOOLS_PRODUCTION_DIR"], "/srv/other checkout")
 
     def test_configured_start_preserves_secrets_and_starts_build_profile(self):
         self.secrets.mkdir()

@@ -76,6 +76,7 @@ services:
       DOCKER_HOST: tcp://docker:2376
       DOCKER_TLS_VERIFY: "1"
       DOCKER_CERT_PATH: /certs/client
+      MY_TOOLS_PRODUCTION_DIR: "${MY_TOOLS_PRODUCTION_DIR:-}"
     entrypoint: [/bin/sh, -ec]
     command:
       - 'export JENKINS_SECRET="$$(cat /run/secrets/agent_secret)"; exec /usr/local/bin/jenkins-agent'
@@ -84,6 +85,8 @@ services:
     volumes:
       - agent_workspace:/home/jenkins/agent
       - docker_certs:/certs/client:ro
+      # Only the separate deployment job explicitly selects the host socket.
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - ci
     stop_grace_period: 60s

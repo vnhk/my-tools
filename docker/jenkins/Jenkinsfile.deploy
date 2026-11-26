@@ -1,0 +1,56 @@
+pipeline {
+    agent { label 'my-tools-builder' }
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timestamps()
+    }
+    parameters {
+        choice(name: 'DEPLOY_ACTION', choices: ['plan', 'deploy', 'rollback'],
+            description: 'Plan validates only. Deploy replaces application containers. Rollback restores previous application images.')
+        string(name: 'SOURCE_BUILD', defaultValue: '', description: 'Leave empty for the latest successful build, or enter an exact build number. Ignored for rollback.')
+    }
+    stages {
+        stage('Checkout deployment tooling') {
+            steps {
+                deleteDir()
+                checkout scm
+                script {
+                    if (params.DEPLOY_ACTION != 'rollback' && params.SOURCE_BUILD.trim() && !(params.SOURCE_BUILD.trim() ==~ /[1-9][0-9]*/)) {
+                        error('Enter a positive source build number or leave it empty for the latest successful build.')
+                    }
+                }
+            }
+        }
+        stage('Copy selected build release') {
+            when { expression { params.DEPLOY_ACTION != 'rollback' } }
+            steps {
+                script {
+                    def selection = params.SOURCE_BUILD.trim() ? specific(params.SOURCE_BUILD.trim()) : lastSuccessful(stable: true)
+                    copyArtifacts projectName: 'my-tools-build', selector: selection,
+                        filter: 'release/*.json,release/*.tar.gz,release/*.sha256',
+                        target: 'artifacts', flatten: true, resultVariableSuffix: 'RELEASE'
+                    timeout(time: 15, unit: 'SECONDS') {
+                        def source = waitForBuild(runId: "my-tools-build#${env.COPYARTIFACT_BUILD_NUMBER_RELEASE}", propagate: false, propagateAbort: false)
+                        if (source.result != 'SUCCESS') {
+                            error('The selected source build must have completed with SUCCESS.')
+                        }
+                    }
+                    echo "Selected my-tools-build #${env.COPYARTIFACT_BUILD_NUMBER_RELEASE}"
+                }
+            }
+        }
+        stage('Run local production action') {
+            steps {
+                sh 'python3 docker/jenkins/deploy-client.py'
+            }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'artifacts/release.json', allowEmptyArchive: true
+        }
+    }
+}

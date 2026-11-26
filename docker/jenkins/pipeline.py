@@ -42,7 +42,7 @@ def reject_secret_names(paths, allow_root_default=False):
         if allow_root_default and Path(path).as_posix() == ".env_my_tools_default":
             continue
         for name in Path(path).parts:
-            if (name in {".local", "jenkins.local.conf", "env_my_tools"} or
+            if (name in {".local", ".jenkins-deploy", "jenkins.local.conf", "env_my_tools"} or
                     name.startswith(".env")) and not name.endswith(".example"):
                 raise ValueError(f"Runtime configuration/secret path is not allowed here: {Path(path).as_posix()}")
 

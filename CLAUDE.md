@@ -58,8 +58,19 @@ artifact snapshot, rebuild transitive Maven consumers and reuse unchanged images
 Use `FORCE_REBUILD` to rebuild all components. Successful builds with integration
 disabled still advance the artifact cache; integration validation is tracked
 separately and runs when re-enabled for unvalidated inputs. Failed builds do not
-advance the baseline. See `docker/jenkins/PIPELINE.md` for cache and test behavior.
+advance the baseline. See `docker/jenkins/README.md` for cache and test behavior.
 The release pipeline never loads production environment files or deploys containers.
+`Jenkinsfile.deploy` defines a separate manually triggered production job. It uses
+a temporary local container with the host Docker socket to run checked-out tooling, preserving the current
+Compose project/data mounts and replaces only backend/frontend containers, with
+HTTP readiness checks and image rollback. The agent has host Docker access;
+production `.env` is mounted only into the temporary deployment container;
+database schema/data rollback is not automated. See `docker/jenkins/README.md`.
+Deployment paths are derived from the server checkout, the Compose project from
+existing containers and its private state directory is created automatically.
+Only the action and optional source build are job parameters; no /opt or /etc
+copies need synchronization. Unchanged backend images are not restarted for a
+frontend-only release.
 See `docker/jenkins/README.md` before running it on the server.
 
 `my-tools-mcp/` is a standalone Node.js stdio MCP adapter for the Project Management

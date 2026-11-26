@@ -1,5 +1,5 @@
 jenkins:
-  systemMessage: "On-demand My Tools CI. Production deployments are not configured."
+  systemMessage: "On-demand My Tools CI. Separate production deployment job uses local Docker."
   numExecutors: 0
   securityRealm:
     local:
